@@ -1,9 +1,13 @@
 ---
 name: p4-ops
-description: "Execute Perforce (P4) operations and retrieve P4 information for the MLBB Unity project. Use this skill whenever the user mentions P4, Perforce, depot, stream, changelist, shelve, sync, workspace, or any version control operations in the context of their game development project. Covers daily developer workflows including syncing code, switching branches, viewing history, managing changelists, resolving conflicts, diffing files, workspace management, exporting depot files, and managing slim/simple projects (瘦身工程). Also trigger when user mentions pulling a branch, getting latest, updating to a specific version, checking file history, submitting changes, exporting/downloading depot files, p4vc/P4V GUI operations, SimpleProj/瘦身工程/简易工程, code review/review changelist/review CL/审查提交/review待办/review单子/点掉review/过一下review. This skill integrates with Lark Project (飞书项目) MCP for end-to-end code review: listing review items from todo, searching P4 CLs by work item ID, reviewing diffs, and completing review nodes. It understands the MLBB project's multi-depot stream structure (MLBB, MLBBArtBridge, MLBBClientCode, MLBBPlugin, MLBBRelease), workspace mapping conventions, and the MLBB Lark Project (project_key: 62c298b6218847b5d28c7675) node workflow."
+description: "Perforce helper for the MLBB Unity project. Trigger only when the user explicitly invokes p4-ops by name, e.g. $p4-ops or 调用 p4-ops. Covers P4 status, sync, streams, workspaces, changelists, shelves, diffs, history, export, P4V, SimpleProj, and Lark Project review workflows."
 ---
 
 # P4 Operations Skill for MLBB Project
+
+## Invoke Policy
+
+Use this skill only after the user explicitly invokes `p4-ops` by name, such as `$p4-ops`, `使用 p4-ops`, or `调用 p4-ops`.
 
 ## 项目结构（核心知识）
 
