@@ -1,6 +1,6 @@
 ---
 name: planning-in-status
-description: "Show all active plans tracked in .planning-dir registry. Displays each plan's name, directory, current phase, and completion progress. Use when the user says 'planning status', 'show plans', 'plan status', or '/planning-in-status'."
+description: "Show all active plans from .plans/. Displays each plan's name, directory, current phase, and completion progress. Use when the user says 'planning status', 'show plans', 'plan status', or '/planning-in-status'."
 user-invocable: true
 disable-model-invocation: true
 allowed-tools: "Read, Bash, Glob, Grep"
@@ -8,19 +8,23 @@ allowed-tools: "Read, Bash, Glob, Grep"
 
 # Planning Status
 
-Show a dashboard of all active plans registered in `.planning-dir`.
+Show a dashboard of all active plans in `.plans/`.
 
 ## Workflow
 
-### 1. Read registry
+### 1. Discover active plans
+
+Scan `.plans/` for subdirectories containing `task_plan.md`:
 
 ```bash
-cat .planning-dir 2>/dev/null
+find .plans -maxdepth 2 -name task_plan.md -exec dirname {} \;
 ```
 
-If `.planning-dir` doesn't exist or is empty, report: `No active plans. Use /planning-in <dir> to create one.`
+Exclude `archive/` and `active/` (staging) directories from results.
 
-### 2. For each registered directory
+If no active plans found, report: `No active plans. Use /planning-in <name> to create one.`
+
+### 2. For each active plan directory
 
 Read `task_plan.md` and extract:
 - **Plan title**: first `# ` heading
@@ -30,7 +34,7 @@ Read `task_plan.md` and extract:
 - **Error count**: count rows in `## Errors Encountered` table (if present)
 - **File sizes**: line counts of all three files
 
-If a registered directory is missing or has no `task_plan.md`, mark it as `[stale]`.
+If a directory has no `task_plan.md`, mark it as `[stale]`.
 
 ### Status Icons
 
@@ -44,7 +48,7 @@ If a registered directory is missing or has no `task_plan.md`, mark it as `[stal
 ```
 Active Plans (2):
 
-  [refactor] ./plans/refactor/
+  [refactor] .plans/refactor/
     API Refactor — Phase 4/5 (🔄 in_progress)
     ✅ Phase 1: Requirements & Discovery
     ✅ Phase 2: Planning & Structure
@@ -54,7 +58,7 @@ Active Plans (2):
     Files: task_plan(120L) findings(45L) progress(80L)
     Errors logged: 2
 
-  [auth] ./plans/auth/
+  [auth] .plans/auth/
     Auth Migration — Phase 2/5 (🔄 in_progress)
     ✅ Phase 1: Requirements & Discovery
     🔄 Phase 2: Planning & Structure  ← current
@@ -67,10 +71,10 @@ Active Plans (2):
 
 ### 4. Stale entries
 
-If any entry points to a missing directory or missing `task_plan.md`:
+If any directory has no `task_plan.md`:
 
 ```
-  [old-feature] ./plans/old-feature/ [stale — no task_plan.md]
+  [old-feature] .plans/old-feature/ [stale — no task_plan.md]
 ```
 
-Suggest: `Use /planning-in:remove to clean up stale entries.`
+Suggest: `Use /planning-in-remove to clean up stale directories.`

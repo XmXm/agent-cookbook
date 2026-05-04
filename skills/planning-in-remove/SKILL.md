@@ -1,40 +1,46 @@
 ---
 name: planning-in-remove
-description: "Remove a plan from the .planning-dir registry. Does NOT delete files on disk — only unregisters the plan so hooks stop tracking it. Usage: /planning-in-remove <dir>. Use when user says 'remove plan', 'unregister plan', 'stop tracking plan', or after archiving a completed plan."
+description: "Remove a plan directory from .plans/. Deletes the plan's task_plan.md, findings.md, progress.md and its directory. Usage: /planning-in-remove <name>. Use when user says 'remove plan', 'delete plan', 'clean up plan', or to remove stale or completed plans that were not archived."
 user-invocable: true
 disable-model-invocation: true
 allowed-tools: "Read, Edit, Bash"
 ---
 
-# Remove Plan from Registry
+# Remove Plan
 
-Unregister a plan directory from `.planning-dir`. Files on disk are preserved.
+Delete a plan directory from `.plans/`. This removes all planning files for that plan.
 
 ## Workflow
 
 ### 1. Identify target
 
-Parse the argument as the directory to remove. If omitted, show the current registry and ask which one to remove:
+Parse the argument as the plan name. If omitted, show active plans and ask which one to remove:
 
 ```bash
-cat -n .planning-dir 2>/dev/null
+find .plans -maxdepth 2 -name task_plan.md -exec dirname {} \;
 ```
 
-### 2. Remove from registry
+### 2. Confirm
+
+Show what will be deleted:
+
+```
+About to delete: .plans/refactor/
+  task_plan.md (277 lines)
+  progress.md (101 lines)
+  findings.md (194 lines)
+Continue? [y/N]
+```
+
+### 3. Delete
 
 ```bash
-grep -vxF "<directory>" .planning-dir > .planning-dir.tmp && mv .planning-dir.tmp .planning-dir
+rm -rf ".plans/<plan-name>"
 ```
 
-If `.planning-dir` is now empty, delete it:
-```bash
-[ -s .planning-dir ] || rm .planning-dir
-```
-
-### 3. Confirm
+### 4. Confirm
 
 ```
-Removed ./plans/refactor from registry.
-Files still on disk at ./plans/refactor/ — delete manually or use planning-archive first.
+Deleted .plans/refactor/ (3 files removed).
 Active plans remaining: 1
 ```

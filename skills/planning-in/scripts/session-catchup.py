@@ -2,7 +2,7 @@
 """
 Session Catchup Script for planning-in (multi-plan aware)
 
-Checks .planning-dir registry, then analyzes previous session for
+Scans .plans/ for active plans, then analyzes previous session for
 unsynced context after the last planning file update.
 
 Usage: python3 session-catchup.py [project-path]
@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import List, Dict, Optional, Tuple
 
 PLANNING_FILES = ['task_plan.md', 'progress.md', 'findings.md']
+PLANS_DIR = '.plans'
 
 
 def get_project_dir(project_path: str) -> Path:
@@ -34,29 +35,28 @@ def get_sessions_sorted(project_dir: Path) -> List[Path]:
 
 
 def get_active_plan_dirs(project_path: str) -> List[str]:
-    """Read .planning-dir registry to find active plan directories."""
-    registry = Path(project_path) / '.planning-dir'
-    if not registry.exists():
+    """Scan .plans/ for subdirectories containing task_plan.md."""
+    plans_path = Path(project_path) / PLANS_DIR
+    if not plans_path.exists():
         return []
     dirs = []
-    with open(registry) as f:
-        for line in f:
-            d = line.strip()
-            if d:
-                dirs.append(d)
+    for child in sorted(plans_path.iterdir()):
+        if child.is_dir() and (child / 'task_plan.md').exists():
+            # Skip archive and active (staging) directories
+            if child.name in ('archive', 'active'):
+                continue
+            dirs.append(str(child))
     return dirs
 
 
 def has_planning_files(project_path: str) -> bool:
-    """Check if any planning files exist, either in root or via registry."""
-    # Check registry first
+    """Check if any planning files exist in .plans/."""
     plan_dirs = get_active_plan_dirs(project_path)
     for d in plan_dirs:
         plan_path = Path(project_path) / d if not Path(d).is_absolute() else Path(d)
         if any((plan_path / f).exists() for f in PLANNING_FILES):
             return True
-    # Fallback: check project root
-    return any((Path(project_path) / f).exists() for f in PLANNING_FILES)
+    return False
 
 
 def parse_session_messages(session_file: Path) -> List[Dict]:
@@ -76,7 +76,6 @@ def parse_session_messages(session_file: Path) -> List[Dict]:
 def find_last_planning_update(messages: List[Dict], plan_dirs: List[str]) -> Tuple[int, Optional[str]]:
     """
     Find the last time a planning file was written/edited.
-    Checks both root-level and registered plan directory paths.
     Returns (line_number, filename) or (-1, None) if not found.
     """
     last_update_line = -1
@@ -223,7 +222,7 @@ def main():
     for d in plan_dirs:
         print(f"2. Read: {d}/task_plan.md, {d}/progress.md, {d}/findings.md")
     if not plan_dirs:
-        print("2. Read planning files from active plan directories")
+        print("2. Read planning files from .plans/")
     print("3. Update planning files based on above context")
     print("4. Continue with task")
 

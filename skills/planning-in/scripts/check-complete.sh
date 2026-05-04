@@ -1,12 +1,12 @@
 #!/bin/bash
-# Check if all phases are complete across all registered plans
-# Reads .planning-dir registry and checks each plan's task_plan.md
+# Check if all phases are complete across all active plans
+# Scans .plans/ for subdirectories containing task_plan.md
 # Always exits 0 — uses stdout for status reporting (used by Stop hook)
 
-REGISTRY=".planning-dir"
+PLANS_DIR=".plans"
 
-if [ ! -f "$REGISTRY" ]; then
-    echo "[planning-in] No .planning-dir found — no active plans."
+if [ ! -d "$PLANS_DIR" ]; then
+    echo "[planning-in] No .plans/ directory — no active plans."
     exit 0
 fi
 
@@ -18,6 +18,11 @@ while IFS= read -r PLAN_DIR; do
     [ -z "$PLAN_DIR" ] && continue
     PLAN_FILE="$PLAN_DIR/task_plan.md"
     [ ! -f "$PLAN_FILE" ] && continue
+
+    # Skip archive and active (staging) directories
+    case "$PLAN_DIR" in
+        .plans/archive|./.plans/archive|.plans/active|./.plans/active) continue ;;
+    esac
 
     PLAN_NAME="$(basename "$PLAN_DIR")"
     PLAN_COUNT=$((PLAN_COUNT + 1))
@@ -47,10 +52,10 @@ while IFS= read -r PLAN_DIR; do
         [ "$IN_PROGRESS" -gt 0 ] && echo "  $IN_PROGRESS phase(s) in progress"
         [ "$PENDING" -gt 0 ] && echo "  $PENDING phase(s) pending"
     fi
-done < "$REGISTRY"
+done < <(find "$PLANS_DIR" -maxdepth 2 -name task_plan.md -exec dirname {} \;)
 
 if [ "$PLAN_COUNT" -eq 0 ]; then
-    echo "[planning-in] No active plans found in registry."
+    echo "[planning-in] No active plans found in .plans/."
 elif [ "$OVERALL_COMPLETE" -eq "$OVERALL_TOTAL" ] && [ "$OVERALL_TOTAL" -gt 0 ]; then
     echo "[planning-in] ALL $PLAN_COUNT PLAN(S) COMPLETE ($OVERALL_COMPLETE/$OVERALL_TOTAL total phases)"
 else

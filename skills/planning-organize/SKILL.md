@@ -11,7 +11,7 @@ Restructure planning documents so they read like a briefing: understand the miss
 
 ## Directory Resolution
 
-Follow the shared Directory Resolution rules in `~/.claude/skills/planning-archive/references/conventions.md` to determine `PLAN_DIR`. Read `$PLAN_DIR/task_plan.md` (and optionally findings.md, progress.md) as the target documents.
+Follow the shared Directory Resolution rules to determine `PLAN_DIR`: scan `.plans/` for subdirectories containing `task_plan.md`. Single match → use it. Multiple → ask user. Read `$PLAN_DIR/task_plan.md` (and optionally findings.md, progress.md) as the target documents.
 
 ## Core Principle
 
@@ -52,7 +52,7 @@ Items in the same list section should have roughly the same level of detail. If 
 **Threshold**: if an item is >5x longer than its siblings, extract the excess.
 
 **How to extract**:
-- Move the detail to a linked file (e.g., `docs/planning-archive/active/tasks/task-N-plan.md`)
+- Move the detail to a linked file (e.g., `$PLAN_DIR/tasks/task-N-plan.md`)
 - Replace the inline content with a compact summary + link
 - Match the format of sibling items
 

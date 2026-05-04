@@ -11,7 +11,7 @@ Organize a parallel Agent Review Team to audit planning documents or implemented
 
 ## Directory Resolution
 
-Follow the shared Directory Resolution rules in `~/.claude/skills/planning-archive/references/conventions.md` to determine `PLAN_DIR`.
+Follow the shared Directory Resolution rules to determine `PLAN_DIR`: scan `.plans/` for subdirectories containing `task_plan.md`. Single match → use it. Multiple → ask user.
 
 ## Core Principles
 

@@ -29,7 +29,7 @@ For each selected task, resolve the actual code diff using these sources in prio
 
 1. **User-specified**: commits, file paths, or CL numbers from the user's message → use directly
 2. **progress.md**: look for "Files created/modified" entries under the task's session dates
-3. **Split file headers**: if task was split, check `docs/planning-archive/active/tasks/task-NN-plan.md` for `Commits:` in the header
+3. **Split file headers**: if task was split, check `$PLAN_DIR/tasks/task-NN-plan.md` for `Commits:` in the header
 4. **Git history**: `git log --oneline --all --grep="task [N]"` or date-range from progress.md entries
 5. **P4 changelists**: if working in P4 context, `p4 changes -l -u $USER //...@start,@end`
 

@@ -1,6 +1,6 @@
 ---
 name: planning-in
-description: "Create planning files (task_plan.md, findings.md, progress.md) in a specified directory or project root. Supports multiple concurrent plans via .planning-dir registry. Usage: /planning-in [dir]. No argument = project root (like planning-with-files). With directory = multi-plan mode, name inferred from basename. For existing plans, just @ the task_plan.md file directly. Use when the user says 'plan', 'plan in', 'planning in', 'start planning', or wants file-based planning."
+description: "Create planning files (task_plan.md, findings.md, progress.md) in .plans/NNN-description/. Supports multiple concurrent plans. Usage: /planning-in [description]. If description is provided, use it as the slug; if omitted, derive a short kebab-case slug from the user's task. Plan directory is auto-numbered (NNN-prefix, incrementing from existing plans). For existing plans, just @ the task_plan.md file directly. Use when the user says 'plan', 'plan in', 'planning in', 'start planning', or wants file-based planning."
 user-invocable: true
 disable-model-invocation: true
 allowed-tools: "Read, Write, Edit, Bash, Glob, Grep, WebFetch, WebSearch"
@@ -9,12 +9,12 @@ hooks:
     - matcher: "Write|Edit|Bash|Read|Glob|Grep"
       hooks:
         - type: command
-          command: "[ -f .planning-dir ] && while IFS= read -r d; do [ -n \"$d\" ] && [ -f \"$d/task_plan.md\" ] && printf '[%s] %s\\n' \"$(basename \"$d\")\" \"$(grep -m1 '^## Current Phase' \"$d/task_plan.md\" -A1 2>/dev/null | tail -1)\"; done < .planning-dir || true"
+          command: "for d in .plans/*/; do [ -f \"$d/task_plan.md\" ] && printf '[%s] %s\\n' \"$(basename \"$d\")\" \"$(grep -m1 '^## Current Phase' \"$d/task_plan.md\" -A1 2>/dev/null | tail -1)\"; done || true"
   PostToolUse:
     - matcher: "Write|Edit"
       hooks:
         - type: command
-          command: "[ -f .planning-dir ] && echo '[planning-in] File updated. Check if any active plan phase needs status update.' || true"
+          command: "for d in .plans/*/; do [ -f \"$d/task_plan.md\" ] && echo '[planning-in] File updated. Check if any active plan phase needs status update.' && break; done || true"
   Stop:
     - hooks:
         - type: command
@@ -23,7 +23,7 @@ hooks:
 
 # Planning In
 
-Create planning files in a **user-specified directory**. Supports multiple concurrent plans.
+Create planning files in `.plans/<name>/`. Supports multiple concurrent plans.
 
 Work like Manus: Use persistent markdown files as your "working memory on disk."
 
@@ -44,54 +44,61 @@ If catchup report shows unsynced context:
 ## Invocation
 
 ```
-/planning-in [directory]
+/planning-in [description]
 ```
 
-- **No argument** → project root (equivalent to `planning-with-files`), plan name = project directory basename
-- **With directory** → multi-plan mode, plan name inferred from directory basename (e.g., `./plans/refactor` → "refactor")
+- **With description** → use it as the slug: `.plans/NNN-description/`
+- **No description** → derive a short kebab-case slug from the user's current task
+
+Plan directories are **auto-numbered** with a `NNN-` prefix. The number is determined by scanning `.plans/` and incrementing the highest existing number.
 
 Examples:
-- `/planning-in` — create plan in project root
-- `/planning-in ./plans/refactor` — create plan "refactor"
-- `/planning-in ./plans/auth` — create another concurrent plan "auth"
+- `/planning-in refactor` → `.plans/006-refactor/` (if 005 is the latest)
+- `/planning-in fix login bug` → `.plans/006-fix-login-bug/`
+- `/planning-in` → `.plans/006-add-user-auth/` (derived from task context)
 
 For existing plans, the user will `@` reference the `task_plan.md` file directly — no skill invocation needed.
 
 ## Multi-Plan Architecture
 
-Each plan is independent — own directory, own files. `.planning-dir` in the project root is a **registry** (one path per line) tracking all active plans.
+Each plan is independent — own directory under `.plans/`, own files. Active plans are discovered by scanning `.plans/` for subdirectories containing `task_plan.md`.
 
 ```
-# .planning-dir
-./plans/refactor
-./plans/auth
+.plans/
+├── 001-monorepo-abtest-platform/   # completed
+├── 003-feature-expansion/          # completed
+├── 006-refactor/                   # active
+│   ├── task_plan.md
+│   ├── findings.md
+│   └── progress.md
+└── 007-fix-login-bug/              # active
+    ├── task_plan.md
+    ├── findings.md
+    └── progress.md
 ```
+
+Completed plans stay in `.plans/` alongside active ones — distinguished by phase status, not by directory location.
 
 ## Workflow
 
-### 1. Parse directory and infer name
+### 1. Resolve plan name
+
+Determine the plan directory name with auto-numbering:
 
 ```bash
-PLAN_DIR="${argument:-.}"   # default to project root if no argument
-if [ "$PLAN_DIR" = "." ]; then
-    PLAN_NAME="$(basename "$(pwd)")"
-else
-    PLAN_NAME="$(basename "$PLAN_DIR")"
-    mkdir -p "$PLAN_DIR"
-fi
+# Find next number from existing .plans/ directories
+NEXT_NUM=$(ls -d .plans/[0-9]* 2>/dev/null | sed 's|.plans/||' | sed 's/-.*//' | sort -n | tail -1)
+NEXT_NUM=$((${NEXT_NUM:-0} + 1))
+NUM=$(printf "%03d" $NEXT_NUM)
+
+# Derive slug from argument or task context
+SLUG="<kebab-case-description>"  # from argument or derived from user's task
+PLAN_NAME="${NUM}-${SLUG}"
+PLAN_DIR=".plans/$PLAN_NAME"
+mkdir -p "$PLAN_DIR"
 ```
 
-### 2. Register
-
-Append to `.planning-dir` (skip if already registered):
-
-```bash
-grep -qxF "$PLAN_DIR" .planning-dir 2>/dev/null || echo "$PLAN_DIR" >> .planning-dir
-```
-
-> Add `.planning-dir` to `.gitignore` — it's a local session artifact.
-
-### 3. Check for existing files
+### 2. Check for existing files
 
 ```bash
 ls "$PLAN_DIR"/{task_plan,findings,progress}.md 2>/dev/null
@@ -99,20 +106,20 @@ ls "$PLAN_DIR"/{task_plan,findings,progress}.md 2>/dev/null
 
 If files exist: show status, ask resume or start fresh.
 
-### 4. Initialize
+### 3. Initialize
 
 Run the init script:
 ```bash
-sh ~/.claude/skills/planning-in/scripts/init-session.sh "$PLAN_DIR"
+sh ~/.claude/skills/planning-in/scripts/init-session.sh "$PLAN_NAME"
 ```
 
 Or create files directly using the templates below.
 
-### 5. Confirm
+### 4. Confirm
 
 ```
 Plan: refactor
-Directory: ./plans/refactor/
+Directory: .plans/refactor/
 Files: task_plan.md | findings.md | progress.md
 Active plans: 2
 ```
@@ -362,9 +369,8 @@ Helper scripts for automation:
 
 | Skill | Integration |
 |-------|------------|
-| `planning-in:status` | Show all active plans from registry |
-| `planning-in:remove` | Remove a plan from registry (keeps files) |
+| `planning-in:status` | Show all active plans from `.plans/` |
+| `planning-in:remove` | Delete a plan directory from `.plans/` |
 | `planning-organize` | Pass the specific plan directory as argument |
-| `planning-split` | Splits completed tasks from a specific plan directory |
-| `planning-archive` | Archives a specific plan directory, then remove from registry |
+| `planning-split` | Splits completed tasks into `.plans/<NNN-name>/tasks/` |
 | `planning-review` | Reviews a specific plan directory |

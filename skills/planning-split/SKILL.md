@@ -1,22 +1,19 @@
 ---
 name: planning-split
-description: "Split large completed task sections from planning documents (task_plan.md, progress.md, findings.md) into individual files under docs/planning-archive/active/. Works with plans created by planning-with-files (project root) or planning-in (custom directory). Source files stay in place but get slimmer — split sections are replaced with one-line links. Does NOT archive or delete source files — use planning-archive for that. Use when planning files exceed ~1000 lines, when the user says 'split task', 'split planning docs', 'planning files too big', 'slim down plan'."
+description: "Split large completed task sections from planning documents (task_plan.md, progress.md, findings.md) into individual files under .plans/<NNN-name>/tasks/. Source files stay in place but get slimmer — split sections are replaced with one-line links. Use when planning files exceed ~1000 lines, when the user says 'split task', 'split planning docs', 'planning files too big', 'slim down plan'."
 user-invocable: true
 disable-model-invocation: true
 ---
 
 # Planning Split
 
-Extract completed task sections from planning files into individual files under `docs/planning-archive/active/`. Source files remain the working documents — they just get slimmer by replacing extracted sections with links.
-
-For directory conventions, naming rules, and task boundary identification, read the shared conventions file:
-`~/.claude/skills/planning-archive/references/conventions.md`
+Extract completed task sections from planning files into individual files under `$PLAN_DIR/tasks/`. Source files remain the working documents — they just get slimmer by replacing extracted sections with links.
 
 ## Directory Resolution
 
-Follow the shared Directory Resolution rules in `~/.claude/skills/planning-archive/references/conventions.md` to determine `PLAN_DIR`.
+Follow the shared Directory Resolution rules to determine `PLAN_DIR`: scan `.plans/` for subdirectories containing `task_plan.md`. Single match → use it. Multiple → ask user.
 
-> **Note**: Source files come from `$PLAN_DIR`, but the staging directory for split files is always `docs/planning-archive/active/` at the project root — this keeps the archive centralized regardless of where the plan lives.
+> **Note**: Source files come from `$PLAN_DIR`, but split files go into `$PLAN_DIR/tasks/` and `$PLAN_DIR/findings/` — keeping everything together within the plan directory.
 
 ## When to Use
 
@@ -31,15 +28,15 @@ Follow the shared Directory Resolution rules in `~/.claude/skills/planning-archi
 - Unfinished tasks always keep their full content in the source files
 - Keep project-level sections (goal, architecture, decisions, risks) in source files
 - Minimum threshold: task section must be **>30 lines** to be worth splitting
-- Already-split sections (containing links to `docs/planning-archive/active/`) are skipped
+- Already-split sections (containing links to `tasks/` within the plan directory) are skipped
 
 ## Workflow
 
 ### 1. Create staging directory
 
 ```bash
-mkdir -p docs/planning-archive/active/tasks
-mkdir -p docs/planning-archive/active/findings
+mkdir -p $PLAN_DIR/tasks/tasks
+mkdir -p $PLAN_DIR/tasks/findings
 ```
 
 ### 2. Build task inventory
@@ -74,7 +71,7 @@ Confirm with user before proceeding.
 
 For each splittable task, extract content verbatim into individual files:
 
-**Task plan content** -> `docs/planning-archive/active/tasks/task-NN-plan.md`:
+**Task plan content** -> `$PLAN_DIR/tasks/tasks/task-NN-plan.md`:
 ```markdown
 # Task NN: Title
 
@@ -86,7 +83,7 @@ For each splittable task, extract content verbatim into individual files:
 [original section content, verbatim]
 ```
 
-**Task progress entries** -> `docs/planning-archive/active/tasks/task-NN-progress.md`:
+**Task progress entries** -> `$PLAN_DIR/tasks/tasks/task-NN-progress.md`:
 ```markdown
 # Task NN: Title — Progress
 
@@ -97,8 +94,8 @@ For each splittable task, extract content verbatim into individual files:
 [all date entries for this task, verbatim]
 ```
 
-**Task-scoped findings** -> `docs/planning-archive/active/tasks/task-NN-findings.md`
-**Cross-task findings** -> `docs/planning-archive/active/findings/topic-name.md`
+**Task-scoped findings** -> `$PLAN_DIR/tasks/tasks/task-NN-findings.md`
+**Cross-task findings** -> `$PLAN_DIR/tasks/findings/topic-name.md`
 
 ### 4. Replace sections in root files with links
 
@@ -106,19 +103,19 @@ In each root file, replace the extracted section with a single-line link:
 
 **task_plan.md**:
 ```markdown
-### Task N: Title — [plan](docs/planning-archive/active/tasks/task-NN-plan.md)
+### Task N: Title — [plan]($PLAN_DIR/tasks/tasks/task-NN-plan.md)
 > One-line summary of what this task accomplished.
 ```
 
 **progress.md**:
 ```markdown
-## YYYY-MM-DD ~ YYYY-MM-DD — Task N: Title — [progress](docs/planning-archive/active/tasks/task-NN-progress.md)
+## YYYY-MM-DD ~ YYYY-MM-DD — Task N: Title — [progress]($PLAN_DIR/tasks/tasks/task-NN-progress.md)
 > Key outcome in one line.
 ```
 
 **findings.md**:
 ```markdown
-## Topic Title — [detail](docs/planning-archive/active/findings/topic-name.md)
+## Topic Title — [detail]($PLAN_DIR/tasks/findings/topic-name.md)
 > Key insight in one line.
 ```
 
@@ -137,4 +134,4 @@ Files created: 12 in tasks/, 2 in findings/
 
 ## After Splitting
 
-When the plan is eventually complete, use `planning-archive` to move everything into a numbered directory. It will detect the `active/` staging area and merge it automatically, updating all internal paths.
+When the plan is complete, completed plans stay in `.plans/` alongside active ones. Use `/planning-in-remove` to clean up if needed.

@@ -1,26 +1,31 @@
 #!/bin/bash
-# Initialize planning files in a specified directory
-# Usage: ./init-session.sh <directory>
-# Plan name is inferred from directory basename
+# Initialize planning files in .plans/NNN-description/
+# Usage: ./init-session.sh <description>
+# Description is required — auto-numbered with NNN prefix.
 
 set -e
 
-PLAN_DIR="${1:-.}"
-DATE=$(date +%Y-%m-%d)
-
-if [ "$PLAN_DIR" = "." ]; then
-    PLAN_NAME="$(basename "$(pwd)")"
-    echo "Initializing plan '$PLAN_NAME' in project root: $(pwd)"
-else
-    PLAN_NAME="$(basename "$PLAN_DIR")"
-    mkdir -p "$PLAN_DIR"
-    echo "Initializing plan '$PLAN_NAME' in: $PLAN_DIR"
+if [ -z "$1" ]; then
+    echo "Error: description is required. Usage: init-session.sh <description>" >&2
+    exit 1
 fi
 
-# Register plan in .planning-dir (append, avoid duplicates)
-grep -qxF "$PLAN_DIR" .planning-dir 2>/dev/null || echo "$PLAN_DIR" >> .planning-dir
-PLAN_COUNT=$(wc -l < .planning-dir | tr -d ' ')
-echo "Registered in .planning-dir ($PLAN_COUNT active plan(s))"
+SLUG="$1"
+# Auto-number: find highest NNN in .plans/ and increment
+HIGHEST=$(ls -d .plans/[0-9]* 2>/dev/null | sed 's|.plans/||' | sed 's/-.*//' | sort -n | tail -1)
+NEXT=$((${HIGHEST:-0} + 1))
+NUM=$(printf "%03d" $NEXT)
+
+PLAN_NAME="${NUM}-${SLUG}"
+PLAN_DIR=".plans/$PLAN_NAME"
+DATE=$(date +%Y-%m-%d)
+
+mkdir -p "$PLAN_DIR"
+echo "Initializing plan '$PLAN_NAME' in: $PLAN_DIR/"
+
+# Count existing active plans (subdirectories of .plans/ with task_plan.md, excluding active/ and archive/)
+PLAN_COUNT=$(find .plans -maxdepth 2 -name task_plan.md -exec dirname {} \; 2>/dev/null | wc -l | tr -d ' ')
+echo "Active plans: $PLAN_COUNT"
 
 # Create task_plan.md
 if [ ! -f "$PLAN_DIR/task_plan.md" ]; then
