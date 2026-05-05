@@ -143,3 +143,12 @@ echo "Plan: $PLAN_NAME"
 echo "Directory: $PLAN_DIR/"
 echo "Files: task_plan.md | findings.md | progress.md"
 echo "Active plans: $PLAN_COUNT"
+
+# Update the global index. Failure here is non-fatal (index is a cache and can
+# always be rebuilt from disk via `plans-index.py rebuild`).
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+if command -v python3 >/dev/null 2>&1 && [ -f "$SCRIPT_DIR/plans-index.py" ]; then
+    python3 "$SCRIPT_DIR/plans-index.py" sync "$PLAN_DIR" >/dev/null 2>&1 \
+        && echo "Index updated: .plans/_index.json" \
+        || echo "Index update skipped (non-fatal; run plans-index.py rebuild to recover)."
+fi

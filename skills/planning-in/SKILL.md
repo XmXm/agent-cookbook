@@ -65,6 +65,7 @@ Each plan is independent — own directory under `.plans/`, own files. Active pl
 
 ```
 .plans/
+├── _index.json                     # global metadata cache (auto-maintained)
 ├── 001-monorepo-abtest-platform/   # completed
 ├── 003-feature-expansion/          # completed
 ├── 006-refactor/                   # active
@@ -78,6 +79,20 @@ Each plan is independent — own directory under `.plans/`, own files. Active pl
 ```
 
 Completed plans stay in `.plans/` alongside active ones — distinguished by phase status, not by directory location.
+
+### Global Index (`.plans/_index.json`)
+
+A cache of plan metadata: title, current phase, completion progress, error
+count, file sizes, timestamps, aggregate status (`pending` / `in_progress` /
+`complete` / `blocked`). Maintained by `scripts/plans-index.py`:
+
+- `init-session.sh` calls `plans-index.py sync <plan-dir>` after creating a plan.
+- `planning-in-status` reads it via `plans-index.py dashboard` (re-syncs from disk first).
+- `planning-in-remove` calls `plans-index.py remove <plan-dir>` after deletion.
+
+The index is **always derivable from disk** — if it goes missing or stale,
+run `python3 scripts/plans-index.py rebuild`. Skills should treat it as a
+fast-path and fall back to scanning `.plans/` if it's unreadable.
 
 ## Workflow
 
@@ -356,9 +371,22 @@ If you can answer these, your context management is solid:
 
 Helper scripts for automation:
 
-- `scripts/init-session.sh` — Initialize planning files in a directory
+- `scripts/init-session.sh` — Initialize planning files in a directory (also syncs `_index.json`)
 - `scripts/check-complete.sh` — Verify all phases complete across all plans
 - `scripts/session-catchup.py` — Recover context from previous session
+- `scripts/plans-index.py` — Maintain `.plans/_index.json` (rebuild / sync / remove / show / dashboard)
+
+Update plan metadata after editing `task_plan.md`:
+
+```bash
+python3 ~/.agents/skills/planning-in/scripts/plans-index.py sync .plans/<plan-dir>
+```
+
+Or rebuild the entire index from disk (safe to run anytime):
+
+```bash
+python3 ~/.agents/skills/planning-in/scripts/plans-index.py rebuild
+```
 
 ## Advanced Topics
 

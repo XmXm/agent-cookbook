@@ -38,9 +38,24 @@ Continue? [y/N]
 rm -rf ".plans/<plan-name>"
 ```
 
-### 4. Confirm
+### 4. Update the global index
+
+After deletion, drop the entry from `.plans/_index.json`:
+
+```bash
+python3 ~/.agents/skills/planning-in/scripts/plans-index.py remove ".plans/<plan-name>"
+```
+
+If that script is unavailable or fails, the index can always be regenerated from disk:
+
+```bash
+python3 ~/.agents/skills/planning-in/scripts/plans-index.py rebuild
+```
+
+### 5. Confirm
 
 ```
 Deleted .plans/refactor/ (3 files removed).
+Removed .plans/refactor from .plans/_index.json.
 Active plans remaining: 1
 ```
