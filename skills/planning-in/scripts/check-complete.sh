@@ -14,8 +14,9 @@ OVERALL_TOTAL=0
 OVERALL_COMPLETE=0
 PLAN_COUNT=0
 
-while IFS= read -r PLAN_DIR; do
-    [ -z "$PLAN_DIR" ] && continue
+for PLAN_DIR in "$PLANS_DIR"/*/; do
+    [ -d "$PLAN_DIR" ] || continue
+    PLAN_DIR="${PLAN_DIR%/}"
     PLAN_FILE="$PLAN_DIR/task_plan.md"
     [ ! -f "$PLAN_FILE" ] && continue
 
@@ -52,7 +53,7 @@ while IFS= read -r PLAN_DIR; do
         [ "$IN_PROGRESS" -gt 0 ] && echo "  $IN_PROGRESS phase(s) in progress"
         [ "$PENDING" -gt 0 ] && echo "  $PENDING phase(s) pending"
     fi
-done < <(find "$PLANS_DIR" -maxdepth 2 -name task_plan.md -exec dirname {} \;)
+done
 
 if [ "$PLAN_COUNT" -eq 0 ]; then
     echo "[planning-in] No active plans found in .plans/."
