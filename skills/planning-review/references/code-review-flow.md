@@ -10,7 +10,7 @@ Read `$PLAN_DIR/task_plan.md` and `$PLAN_DIR/progress.md`. Identify tasks with s
 
 **1b. Present task selection**
 
-If multiple tasks are completed, ask the user which to review (use AskUserQuestion):
+If multiple tasks are completed, ask the user which to review via the available user-input mechanism:
 
 ```
 Completed tasks available for code review:
@@ -77,11 +77,12 @@ Derive from the code changes, not from a fixed menu. Consider these seed categor
 
 Each dimension gets: name, 4-6 specific questions targeting the actual changed files, and concrete search targets (class names, method names from the diff).
 
-## Step 5: Create Round Tracking Task
+## Step 5: Prepare Code Review Files
 
-```
-TaskCreate(subject="Code Review R[N]: Task [T] — [TaskName]", description="Code review round [N] for plan task [T]. Files: [count]. Commits: [hashes]. Dimensions: [list].")
-```
+1. Create `$PLAN_DIR/review/` if it is missing.
+2. Read or create `$PLAN_DIR/review/index.md`.
+3. Reserve `$PLAN_DIR/review/R[N]-code-task-[T].md` as the report path.
+4. Record the selected task, change manifest, dimensions, commits, and changed file count in the report setup section.
 
 ## Step 6: Compose & Launch Agents
 
@@ -119,28 +120,14 @@ When all agents complete:
 1. **Read all results** — don't concatenate
 2. **Deduplicate**: Same file:line from multiple agents → merge, cite all evidence, take highest severity
 3. **Validate**: Cross-check against your deep-read understanding. Reject false positives (e.g., "missing null check" where the caller guarantees non-null). Upgrade real issues that agents under-scored.
-4. **Register each P0 and P1 as a Task**:
-
-```
-TaskCreate(
-  subject="[R2-P0-1] BehaviorLockManager.Acquire() missing lock release on exception path",
-  description="If Acquire() throws after incrementing _lockCount, the count is never decremented.\nFile: BehaviorLockManager.cs:47-62\nCommit: abc1234\nPlan task: 6",
-  metadata={"severity": "P0", "round": 2, "review_type": "code", "plan_task": "6", "file_path": "BehaviorLockManager.cs", "line_range": "47-62", "commit_hash": "abc1234", "plan_section": "1.1", "doc_line_hint": "BehaviorLockManager.Acquire"}
-)
-```
-
-**Code review Task metadata**:
-- `severity`: P0 / P1
-- `round`: the round number
-- `review_type`: `"code"` (distinguishes from plan review Tasks where `review_type` is absent or `"plan"`)
-- `plan_task`: which plan task number this code implements
-- `file_path`: primary file where the issue was found
-- `line_range`: line range in the file (at the reviewed commit)
-- `commit_hash`: commit (or CL number for P4) where the issue was introduced
-- `plan_section`: corresponding plan section (for cross-reference)
-- `doc_line_hint`: content phrase for grep relocation
-
-5. **Output report**:
+4. **Write `$PLAN_DIR/review/R[N]-code-task-[T].md`** with P0/P1/P2 graded findings, change summary, evidence, impact, and suggested fixes.
+5. **Update `$PLAN_DIR/review/index.md`**:
+   - Add each P0/P1 to `Open P0/P1 Findings`
+   - Set `Type = Code`
+   - Include `ID`, `Severity`, `Round`, `Status`, `Finding`, `Evidence`, `Required Fix`, and `Relocation Hint`
+   - Put file path, line range, commit hash or CL number, and plan task in the `Evidence` cell
+   - Add a `Round History` row pointing to the code review report file
+6. **Output report**:
 
 ```markdown
 # R[N] Code Review Report — Task [T]: [TaskName]
@@ -157,7 +144,7 @@ Commits: [list] | Files: [count] | Lines: +[added] / -[removed]
 |---|-------|------|-------|--------|
 
 ## P2 Observations
-[Bulleted list — not tracked as Tasks]
+[Bulleted list]
 
 ## Summary
 P0: [count] | P1: [count] | P2: [count]

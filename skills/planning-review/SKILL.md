@@ -1,6 +1,6 @@
 ---
 name: planning-review
-description: "Multi-agent iterative review of planning documents and implemented code. Spawns parallel Agent Review Teams with dynamically generated review dimensions. Supports plan review (audit task_plan.md) and code review (audit code changes for completed plan tasks). Uses Task tools to track P0/P1 findings across rounds."
+description: "Multi-agent iterative review of planning documents and implemented code. Spawns parallel Agent Review Teams with dynamically generated review dimensions. Supports plan review (audit task_plan.md) and code review (audit code changes for completed plan tasks). Stores review reports and P0/P1 tracking under the plan directory."
 user-invocable: true
 disable-model-invocation: true
 ---
@@ -13,11 +13,53 @@ Organize a parallel Agent Review Team to audit planning documents or implemented
 
 Follow the shared Directory Resolution rules to determine `PLAN_DIR`: scan `.plans/` for subdirectories containing `task_plan.md`. Single match → use it. Multiple → ask user.
 
+## Review State Files
+
+All durable review state lives under `$PLAN_DIR/review/`.
+
+```
+$PLAN_DIR/review/
+├── index.md                      # Cross-round state: open/resolved P0/P1, round history, review mode notes
+├── R1.md                         # Round 1 plan review report
+├── R2.md                         # Round 2 plan review report
+└── R3-code-task-6.md             # Code review report for a selected plan task
+```
+
+`review/index.md` is the cross-round memory. Each `R*.md` file is an immutable round snapshot unless the same round is still being synthesized.
+
+Use this table schema in `review/index.md`:
+
+```markdown
+# Planning Review Index
+
+## Metadata
+| Field | Value |
+|-------|-------|
+| Plan | `.plans/<name>` |
+| Current Round | R<N> |
+| Last Review Type | Plan Review / Code Review |
+| Last Updated | YYYY-MM-DD |
+
+## Open P0/P1 Findings
+| ID | Severity | Type | Round | Status | Finding | Evidence | Required Fix | Relocation Hint |
+|----|----------|------|-------|--------|---------|----------|--------------|-----------------|
+
+## Resolved P0/P1 Findings
+| ID | Severity | Type | Found | Resolved | Finding | Evidence | Resolution Evidence |
+|----|----------|------|-------|----------|---------|----------|---------------------|
+
+## Round History
+| Round | File | Type | Mode | Open P0 | Open P1 | Resolved |
+|-------|------|------|------|---------|---------|----------|
+```
+
+Finding IDs use `R<N>-<severity>-<number>`, for example `R1-P0-1`. Code review findings also carry the same ID style and set `Type = Code`.
+
 ## Core Principles
 
 1. **Leader comprehension first**: You must deeply understand the plan before spawning any agent. You are the Review Lead, not a dispatcher.
 2. **Dimensions from content**: Read the plan, identify its core risks, then create review dimensions targeting those risks. Every plan is different — do not use a fixed dimension menu.
-3. **Task-tracked findings**: Use TaskCreate to register each P0/P1 with doc location. Use TaskUpdate to track resolution. This IS the cross-round memory.
+3. **File-backed findings**: Use `$PLAN_DIR/review/index.md` to register each P0/P1 with doc location, code evidence, required fix, status, and relocation hint. This file is the cross-round memory.
 4. **R1 = wide + deep; R2+ = narrow + deeper**: First round covers everything thoroughly. Subsequent rounds focus on what changed.
 5. **Code-verified findings**: Every finding must be backed by codebase evidence. Verification agents must search code to cross-validate, not just read the plan text.
 
@@ -37,15 +79,17 @@ Check the user's message for explicit code review signals:
 ### 2. Check existing review state
 
 ```
-TaskList → scan for tasks with subject matching "[R*-P0-*]" or "[R*-P1-*]" or "Plan Review R*" or "Code Review R*"
+mkdir -p "$PLAN_DIR/review"
+Read "$PLAN_DIR/review/index.md" if present.
+List "$PLAN_DIR/review"/R*.md and find the highest round number.
 ```
 
 ### 3. Determine current round
 
-- **No review Tasks found** → This is **R1** (first round).
+- **No review state found** → This is **R1** (first round).
   - If `INTENT = plan_review` → Go to **[First Round Flow]**
   - If `INTENT = code_review` → Go to **[Code Review Flow]**
-- **Review Tasks exist** → This is **R(N+1)** where N = highest round number in existing Tasks. Go to **[Iteration Round Flow]** (which offers code review as Mode D).
+- **Review state exists** → This is **R(N+1)** where N = highest round number in `review/R*.md`. Go to **[Iteration Round Flow]** (which offers code review as Mode D).
 
 ---
 
@@ -88,11 +132,12 @@ Do NOT pick from a fixed menu. Derive from what you read:
    - 4-6 specific verification questions for codebase search
    - Concrete search targets: class names, method names, patterns
 
-### Step 3: Create Round Tracking Task
+### Step 3: Prepare Review Files
 
-```
-TaskCreate(subject="Plan Review R1: [TaskName]", description="Round 1. Dimensions: [list]. Agents: [count].")
-```
+1. Create `$PLAN_DIR/review/` if it is missing.
+2. Create or refresh `$PLAN_DIR/review/index.md` with metadata, open/resolved findings tables, and round history.
+3. Reserve `$PLAN_DIR/review/R1.md` as the report path for this round.
+4. Record the planned dimensions and agent count in the round report setup section.
 
 ### Step 4: Compose & Launch Agents
 
@@ -129,23 +174,13 @@ When all agents complete:
 1. **Read all results** carefully — don't concatenate
 2. **Deduplicate**: Same issue from multiple agents → merge, cite all evidence, take highest severity
 3. **Validate**: Use your deep-read understanding to sanity-check. Reject false positives. Upgrade missed P0s.
-4. **Register each P0 and P1 as a Task**:
-
-```
-TaskCreate(
-  subject="[R1-P0-1] volatile struct is illegal in C#",
-  description="C# volatile cannot be applied to struct types. Must change to sealed class.\nDoc location: task_plan.md (section 1.1 BehaviorLock)\nCode evidence: LogicFighter.cs:2616",
-  metadata={"severity": "P0", "round": 1, "plan_section": "1.1", "doc_line_hint": "BehaviorLockSnapshot struct"}
-)
-```
-
-**Task metadata**:
-- `severity`: P0 / P1
-- `round`: the round number when this finding was discovered
-- `plan_section`: section number in task_plan.md (e.g., "1.1", "2.7")
-- `doc_line_hint`: a content phrase for grep relocation after document edits (more stable than line numbers)
-
-5. **Output report** with P0/P1/P2 graded findings + summary table
+4. **Write `$PLAN_DIR/review/R1.md`** with P0/P1/P2 graded findings, review setup, evidence, impact, and required fixes.
+5. **Update `$PLAN_DIR/review/index.md`**:
+   - Add each P0/P1 to `Open P0/P1 Findings`
+   - Include `ID`, `Severity`, `Type`, `Round`, `Status`, `Finding`, `Evidence`, `Required Fix`, and `Relocation Hint`
+   - Use `doc_line_hint` as the relocation hint, for example `BehaviorLockSnapshot struct`
+   - Add a `Round History` row pointing to `review/R1.md`
+6. **Output a concise report** and include the report path.
 
 ---
 
@@ -156,12 +191,13 @@ TaskCreate(
 **1a. Load prior findings**
 
 ```
-TaskList → collect all open (non-completed) P0 and P1 Tasks
+Read "$PLAN_DIR/review/index.md" and collect rows in "Open P0/P1 Findings".
+If index.md is missing but R*.md files exist, rebuild the open list from the newest round report before continuing.
 ```
 
 **1b. Present review mode menu**
 
-Ask the user to choose (use AskUserQuestion):
+Ask the user to choose via the available user-input mechanism:
 
 ```
 This is review round R[N]. Detected [X] open P0(s) and [Y] open P1(s).
@@ -175,7 +211,7 @@ D. Code Review — review actual code changes for completed plan tasks
 
 **1c. Auto-select fallback**
 
-- If user selects A (Verify Fixes) but **no open P0/P1 Tasks exist** → auto-switch to B, inform the user: "All prior P0/P1 items are closed. Auto-switching to Find New Issues mode."
+- If user selects A (Verify Fixes) and the open list is empty → auto-switch to B, inform the user: "All prior P0/P1 items are closed. Auto-switching to Find New Issues mode."
 - If user selects D → Go to **[Code Review Flow]**.
 - If user doesn't respond or defers → default to C if open P0/P1 exist, otherwise B.
 
@@ -183,7 +219,7 @@ D. Code Review — review actual code changes for completed plan tasks
 
 1. Read the updated `$PLAN_DIR/task_plan.md` — focus on what changed
 2. Read the user's fix description (from their message or a change summary)
-3. For each open Task, use `doc_line_hint` to grep and locate the fix in the updated document. If the section moved, update the Task description with the new location.
+3. For each open P0/P1 row, use `Relocation Hint` to grep and locate the fix in the updated document. If the section moved, update `review/index.md` with the new location in the evidence or required-fix text.
 
 ### Step 3: Configure Agents by Mode
 
@@ -208,21 +244,20 @@ All in one message, all `run_in_background: true`. Name format: `r[N]-verify-[di
 
 ### Step 5: Synthesize Report
 
-1. **Resolution tracking** (Mode A/C): For each prior open Task:
-   ```
-   TaskUpdate(id=..., status="completed")     // resolved
-   TaskUpdate(id=..., status="in_progress")    // partial, add note to description
-   // unresolved → leave as pending, append round note
-   ```
+1. **Resolution tracking** (Mode A/C): For each prior open P0/P1 row:
+   - `Resolved` → move the row to `Resolved P0/P1 Findings` and add resolution evidence
+   - `Partial` → keep the row open, set `Status = Partial`, and append the current round note
+   - `Unresolved` → keep the row open, set `Status = Open`, and append the current round evidence
+   - `New Issue` → add a new open row with current round number
 
-2. **New findings** (Mode B/C): Register new P0/P1 as Tasks with current round number
+2. **New findings** (Mode B/C): Add new P0/P1 rows to `Open P0/P1 Findings` with current round number
 
-3. **Report format**:
+3. **Write the round report** to `$PLAN_DIR/review/R[N].md` with this format:
    ```markdown
    # R[N] Review Report — [Mode Name]
 
    ## Prior P0/P1 Resolution Status (if Mode A or C)
-   | Task ID | Issue | Status | Evidence |
+   | Finding ID | Issue | Status | Evidence |
    |---------|-------|--------|----------|
 
    ## New P0 Findings (if Mode B or C)
@@ -234,6 +269,8 @@ All in one message, all `run_in_background: true`. Name format: `r[N]-verify-[di
    ## Summary
    Open P0: [count] | Open P1: [count] | Resolved this round: [count]
    ```
+
+4. **Update `review/index.md`** with the new open/resolved counts and a `Round History` row.
 
 ---
 
@@ -276,13 +313,32 @@ Follow the complete Code Review Flow in [`./references/code-review-flow.md`](./r
 
 For simple plans (1-2 phases, single concern):
 - Skip agent team entirely
-- Review inline in your response
+- Review inline in your response and write the same findings to `$PLAN_DIR/review/R[N].md`
 - Still use P0/P1/P2 grading
-- Still use TaskCreate for any P0 findings (maintains consistency for potential follow-up)
-- For code review of Light plans: review code inline with the same P0/P1/P2 grading. Still use `review_type: "code"` in Task metadata.
-- Follow the same Entry Point auto-detection — if prior Tasks exist, show the mode menu
+- Register any P0/P1 findings in `$PLAN_DIR/review/index.md`
+- For code review of Light plans: review code inline with the same P0/P1/P2 grading and use `Type = Code` in the index row.
+- Follow the same Entry Point auto-detection — if prior review state exists, show the mode menu
 
 ---
+
+## Optional Task Mirror
+
+Some runtimes provide Task tools. After writing `review/index.md` and the round report, you may mirror open P0/P1 rows into TaskCreate/TaskUpdate for UI convenience. The review files remain authoritative.
+
+Mirror each row with these fields:
+
+```json
+{
+  "severity": "P0",
+  "round": 1,
+  "review_type": "plan",
+  "plan_section": "1.1",
+  "doc_line_hint": "BehaviorLockSnapshot struct",
+  "review_file": "$PLAN_DIR/review/R1.md"
+}
+```
+
+Use the mirror only after the file-backed state is updated.
 
 ## Anti-Patterns
 
@@ -291,7 +347,7 @@ For simple plans (1-2 phases, single concern):
 3. **Broad re-review on R2+**: Mode A (Verify Fixes) should NOT re-scan the whole plan. Only the fixes and their blast radius.
 4. **Line-number anchoring**: Use `doc_line_hint` (content phrase grep) to relocate findings. Line numbers break on edit.
 5. **Severity inflation**: P0 = "will fail". Not "could be better".
-6. **Skipping Task registration**: Without Tasks, R2+ has no memory of R1. The Task list IS the cross-round state.
+6. **Skipping index updates**: `review/index.md` is the R2+ memory for R1 findings and resolution status.
 7. **Missing code evidence**: "This might be a problem" is not a finding. "LogicFighter.cs:2616 Dictionary<int,int> not thread-safe" is.
 8. **Plan-text-only verification**: Saying "the plan now says sealed class so P0-1 is fixed" without grepping the codebase is lazy verification. The Verification Agent Protocol exists to prevent this.
 9. **Diff-only code review**: Reading only the diff without understanding the surrounding code produces shallow findings. Always read the full file context for non-trivial changes.
