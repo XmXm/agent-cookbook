@@ -32,10 +32,8 @@ appears here and that every listed active skill exists.
 
 | Trigger | Skill |
 |---|---|
-| URL, web search, docs lookup, X, GitHub, WeChat, Feishu, clipping | `skills/jjclaw-reach/SKILL.md` |
 | Writing, editing prose, release notes, bilingual polish | `skills/write/SKILL.md` |
 | Push a local Markdown file to Notion | `skills/notion-md-sync/SKILL.md` |
-| Perforce and MLBB Unity project operations | `skills/p4-ops/SKILL.md` |
 
 ### Git Convenience
 
@@ -45,18 +43,18 @@ appears here and that every listed active skill exists.
 
 ## Legacy
 
-These skills are parked under `skills/legacy/` because active Waza skills now
+These skills are parked under `legacy/` because active Waza skills now
 cover the same workflow:
 
 | Legacy skill | Active replacement |
 |---|---|
-| `skills/legacy/brainstorming/SKILL.md` | `skills/think/SKILL.md` |
-| `skills/legacy/systematic-debugging/SKILL.md` | `skills/hunt/SKILL.md` |
+| `legacy/brainstorming/SKILL.md` | `skills/think/SKILL.md` |
+| `legacy/systematic-debugging/SKILL.md` | `skills/hunt/SKILL.md` |
+| `legacy/p4-ops/SKILL.md` | Project-local Perforce workflow |
 
 ## Routing Notes
 
 - Read the matched skill before acting.
 - When several skills match, choose the most specific workflow.
-- For URL research, use `jjclaw-reach` first. For long-form synthesis, create a dedicated local research workflow later.
 - For completed implementation work, use `check`; for broken behavior, use `hunt`.
 - For UI taste and composition work, use `design`; for UI regressions, use `hunt`.

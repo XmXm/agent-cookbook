@@ -33,42 +33,52 @@ if [ ! -f "$PLAN_DIR/task_plan.md" ]; then
 # Task Plan: $PLAN_NAME
 
 ## Goal
-[One sentence describing the end state]
+[One sentence end state]
+
+## Building / Not Building
+**Building:** [what this plan delivers]
+**Not Building (out of scope):** [explicit non-goals; protects against scope drift]
+
+## Approach
+[Chosen direction with rationale. Mention the rejected alternative only if the tradeoff was close.]
+
+## Key Decisions
+| Decision | Rationale |
+|----------|-----------|
+
+## Premise Collapse
+- **Most fragile assumption:** [the load-bearing assumption most likely to be wrong]
+- **If it fails:** [what breaks]
+- **Mitigation:** [how the design survives or how we detect early]
+
+## External Dependencies
+| Dependency | Why needed | Source / owner | Reachability check | Status |
+|------------|------------|----------------|--------------------|--------|
+| (API key name / env var name / MCP / 3rd-party CLI / credential owner) | | | | pending / ready / blocked |
+
+## Verification Plan
+| Phase | Command | Expected outcome |
+|-------|---------|------------------|
+
+## Rollback
+[For each irreversible step: how to undo. Write \`N/A — local-only\` when there is no external state change.]
+
+---
 
 ## Current Phase
 Phase 1
 
 ## Phases
 
-### Phase 1: Requirements & Discovery
-- [ ] Understand user intent
-- [ ] Identify constraints and requirements
-- [ ] Document findings in findings.md
+### Phase 1: [Concrete name derived from Approach]
+- [ ] [Specific action]
+- [ ] [Specific action]
+- **Verification:** [exact command, must match Verification Plan row]
 - **Status:** in_progress
 
-### Phase 2: Planning & Structure
-- [ ] Define technical approach
-- [ ] Create project structure if needed
-- [ ] Document decisions with rationale
-- **Status:** pending
-
-### Phase 3: Implementation
-- [ ] Execute the plan step by step
-- [ ] Write code to files before executing
-- [ ] Test incrementally
-- **Status:** pending
-
-### Phase 4: Testing & Verification
-- [ ] Verify all requirements met
-- [ ] Document test results in progress.md
-- [ ] Fix any issues found
-- **Status:** pending
-
-### Phase 5: Delivery
-- [ ] Review all output files
-- [ ] Ensure deliverables are complete
-- [ ] Deliver to user
-- **Status:** pending
+<!-- Add additional phases as the work naturally splits.
+     Do NOT pad to 5 phases. A bug fix may need 2; a refactor may need 6.
+     Every phase MUST have a concrete Verification command. -->
 
 ## Decisions Made
 | Decision | Rationale |
@@ -79,6 +89,7 @@ Phase 1
 |-------|---------|------------|
 EOF
     echo "  Created $PLAN_DIR/task_plan.md"
+    echo "  [planning-in] Skeleton created. Fill Approach / Premise Collapse / External Dependencies BEFORE writing phase tasks."
 else
     echo "  $PLAN_DIR/task_plan.md already exists, skipping"
 fi
@@ -117,7 +128,7 @@ if [ ! -f "$PLAN_DIR/progress.md" ]; then
 
 ## Session: $DATE
 
-### Phase 1: Requirements & Discovery
+### Phase 1: [name from task_plan.md]
 - **Status:** in_progress
 - **Started:** $DATE
 - Actions taken:

@@ -94,6 +94,16 @@ The index is **always derivable from disk** — if it goes missing or stale,
 run `python3 scripts/plans-index.py rebuild`. Skills should treat it as a
 fast-path and fall back to scanning `.plans/` if it's unreadable.
 
+## Pre-flight (Before Creating Files)
+
+Run these checks before initializing any plan files. Skipping pre-flight produces plans that look organized but rest on shaky assumptions.
+
+1. **Path confirmation**: `pwd` and `git rev-parse --show-toplevel`. Confirm the working directory is the project the user actually means. Do not assume `~/project` and `~/www/project` are the same.
+2. **Prior decisions**: Skim existing ADRs, design docs, and `.plans/` entries on the same topic. Avoid re-deciding what was already decided, or unknowingly contradicting a prior plan.
+3. **Real config references**: If the plan involves a default value, env var, or config field, open the actual project config file (e.g. `package.json`, `tauri.conf.json`, `pake.json`, `.env.example`) and record the key name, file path, source of truth, and verification status. For secrets, record variable name, owner, and reachability status only; secret values stay in env vars or secret managers.
+4. **Official solutions first**: Before recommending a custom implementation, check whether the framework, language stdlib, or ecosystem already provides the capability. If an official solution exists, it is the default unless you can articulate why it is insufficient.
+5. **Blocking ambiguity**: If the user's requirements contain a conflict (two contradicting sources, two valid interpretations with different cost), stop and ask which takes precedence. Never silently pick one and write it into `task_plan.md`.
+
 ## Workflow
 
 ### 1. Resolve plan name
@@ -121,14 +131,35 @@ ls "$PLAN_DIR"/{task_plan,findings,progress}.md 2>/dev/null
 
 If files exist: show status, ask resume or start fresh.
 
-### 3. Initialize
+### 3. Initialize (Two-Phase)
 
-Run the init script:
+**3a. Design Phase — fill the design header before writing phases**
+
+Before phase tasks exist, populate the design header in `task_plan.md` with concrete content:
+
+- `Goal` — one sentence end state
+- `Building / Not Building` — explicit scope and out-of-scope list
+- `Approach` — chosen direction with rationale; mention the rejected alternative only if the tradeoff was close
+- `Key Decisions` — 3-5 decisions with reasoning
+- `Premise Collapse` — most fragile assumption + what happens if it fails + mitigation
+- `External Dependencies` — every API key name, env var name, MCP server, third-party CLI, credential owner, and reachability check; secret values stay out of plan files
+- `Verification Plan` — per-phase command and expected outcome
+- `Rollback` — how to undo each irreversible step (write `N/A` only when truly local-only)
+
+If the user has already provided this content in the prior conversation (e.g. from a design discussion), transcribe it verbatim. Do not re-litigate decisions.
+
+**Forbidden in the design header**: TBD, TODO, "implement later", "similar to step N", "details to be determined". A plan with placeholders is a promise to plan later.
+
+**3b. Phase Skeleton — derive phases from Approach**
+
+Split Approach into Phases by natural work unit, not by a fixed template. A bug fix might need 2 phases; a refactor might need 6. Each phase must include a concrete `Verification` command. If you cannot name the verification command, the phase is sliced too coarsely — split it.
+
+Run the init script to scaffold files:
 ```bash
 sh ~/.claude/skills/planning-in/scripts/init-session.sh "$PLAN_NAME"
 ```
 
-Or create files directly using the templates below.
+The script generates the new template (design header + empty phase skeleton). Fill the design header before writing phase tasks.
 
 ### 4. Confirm
 
@@ -160,46 +191,58 @@ Filesystem = Disk (persistent, unlimited)
 
 ### task_plan.md
 
+The template is split into a **design header** (must be filled before phases) and a **phase body** (derived from Approach). No section may contain TBD / TODO / "implement later" placeholders.
+
 ```markdown
 # Task Plan: [Plan Name]
 
 ## Goal
-[One sentence describing the end state]
+[One sentence end state]
+
+## Building / Not Building
+**Building:** [what this plan delivers]
+**Not Building (out of scope):** [explicit non-goals; protects against scope drift]
+
+## Approach
+[Chosen direction with rationale. Mention the rejected alternative only if the tradeoff was close (>40% chance the user would prefer it).]
+
+## Key Decisions
+| Decision | Rationale |
+|----------|-----------|
+
+## Premise Collapse
+- **Most fragile assumption:** [the load-bearing assumption most likely to be wrong]
+- **If it fails:** [what breaks]
+- **Mitigation:** [how the design survives or how we detect early]
+
+## External Dependencies
+| Dependency | Why needed | Source / owner | Reachability check | Status |
+|------------|------------|----------------|--------------------|--------|
+| (API key name / env var name / MCP / 3rd-party CLI / credential owner) | | | | pending / ready / blocked |
+
+## Verification Plan
+| Phase | Command | Expected outcome |
+|-------|---------|------------------|
+
+## Rollback
+[For each irreversible step: how to undo. Write `N/A — local-only` only when there is no external state change.]
+
+---
 
 ## Current Phase
 Phase 1
 
 ## Phases
 
-### Phase 1: Requirements & Discovery
-- [ ] Understand user intent
-- [ ] Identify constraints and requirements
-- [ ] Document findings in findings.md
+### Phase 1: [Concrete name derived from Approach]
+- [ ] [Specific action]
+- [ ] [Specific action]
+- **Verification:** [exact command, must match Verification Plan row]
 - **Status:** in_progress
 
-### Phase 2: Planning & Structure
-- [ ] Define technical approach
-- [ ] Create project structure if needed
-- [ ] Document decisions with rationale
-- **Status:** pending
-
-### Phase 3: Implementation
-- [ ] Execute the plan step by step
-- [ ] Write code to files before executing
-- [ ] Test incrementally
-- **Status:** pending
-
-### Phase 4: Testing & Verification
-- [ ] Verify all requirements met
-- [ ] Document test results in progress.md
-- [ ] Fix any issues found
-- **Status:** pending
-
-### Phase 5: Delivery
-- [ ] Review all output files
-- [ ] Ensure deliverables are complete
-- [ ] Deliver to user
-- **Status:** pending
+<!-- Add additional phases as the work naturally splits.
+     Do NOT pad to 5 phases. A bug fix may need 2; a refactor may need 6.
+     Every phase MUST have a concrete Verification command. -->
 
 ## Decisions Made
 | Decision | Rationale |
@@ -294,6 +337,15 @@ if action_failed:
 ```
 Track what you tried. Mutate the approach.
 
+### 7. Design Before Phases
+No `Approach` / `Not Building` / `Premise Collapse` → no phase tasks. Phases are the execution path of Approach, not placeholders to fill in later. Filling phases first produces busy-work that points in the wrong direction.
+
+### 8. No Placeholders in Approved Plan
+TBD, TODO, "implement later", "similar to step N", "details to be determined" are forbidden in `task_plan.md` once the design header is approved. A plan with placeholders is a promise to plan later — and that later usually doesn't happen.
+
+### 9. External Dependencies Upfront
+Every API key name, env var name, MCP server, third-party CLI, OAuth flow, and credential owner must be listed in `External Dependencies` and verified reachable **before Phase 1 starts**. Secret values stay in the environment or secret manager; the plan stores names, ownership, paths, and redacted status.
+
 ## The 3-Strike Error Protocol
 
 ```
@@ -329,9 +381,9 @@ AFTER 3 FAILURES: Escalate to User
 | Error occurred | Read relevant file | Need current state to fix |
 | Resuming after gap | Read all planning files | Recover state |
 
-## The 5-Question Reboot Test
+## The 7-Question Reboot Test
 
-If you can answer these, your context management is solid:
+If you can answer these, your context management and design memory are solid:
 
 | Question | Answer Source |
 |----------|---------------|
@@ -340,6 +392,8 @@ If you can answer these, your context management is solid:
 | What's the goal? | Goal statement in plan |
 | What have I learned? | findings.md |
 | What have I done? | progress.md |
+| What did I assume that could be wrong? | Premise Collapse in task_plan.md |
+| Which steps need rollback if they fail? | Rollback section in task_plan.md |
 
 ## When to Use This Pattern
 
@@ -366,6 +420,12 @@ If you can answer these, your context management is solid:
 | Start executing immediately | Create plan file FIRST |
 | Repeat failed actions | Track attempts, mutate approach |
 | Create files in skill directory | Create files in the plan directory |
+| Pad to a generic Phase 1–5 template | Split phases by natural work unit derived from Approach |
+| Write phase tasks with no Verification | Every phase needs a concrete verification command; if you can't name one, the phase is too coarse |
+| Quote default values / config from memory | Open the actual project config file and record the live source path, key name, and safe value metadata |
+| Skip Premise Collapse and jump to tasks | State the most fragile assumption explicitly; let the design survive its failure |
+| Ask the user for an API key mid-Phase 3 | List every credential in External Dependencies before Phase 1 starts |
+| Leave TBD / TODO in the design header | A plan with placeholders is a promise to plan later — fill it now or stop |
 
 ## Scripts
 

@@ -45,11 +45,11 @@ Edit .plans/exercise-research/task_plan.md   # Mark complete
 
 ```
 .plans/
-├── auth-refactor/
+├── 001-auth-refactor/
 │   ├── task_plan.md
 │   ├── findings.md
 │   └── progress.md
-└── dark-mode/
+└── 002-dark-mode/
     ├── task_plan.md
     ├── findings.md
     └── progress.md
@@ -57,24 +57,24 @@ Edit .plans/exercise-research/task_plan.md   # Mark complete
 
 ### PreToolUse hook now shows both:
 ```
-[auth-refactor] Phase 3: Implementation
-[dark-mode] Phase 1: Requirements & Discovery
+[001-auth-refactor] Phase 2: Auth handler patch
+[002-dark-mode] Phase 1: Theme token inventory
 ```
 
 ### Working on auth-refactor:
 ```bash
-Read .plans/auth-refactor/task_plan.md
+Read .plans/001-auth-refactor/task_plan.md
 Edit src/auth/login.ts
-Edit .plans/auth-refactor/progress.md        # Log changes
-Edit .plans/auth-refactor/task_plan.md       # Update phase
+Edit .plans/001-auth-refactor/progress.md        # Log changes
+Edit .plans/001-auth-refactor/task_plan.md       # Update phase
 ```
 
 ### Switching to dark-mode:
 ```bash
-Read .plans/dark-mode/task_plan.md           # Context switch
-Read .plans/dark-mode/findings.md
+Read .plans/002-dark-mode/task_plan.md           # Context switch
+Read .plans/002-dark-mode/findings.md
 Edit src/styles/theme.ts
-Edit .plans/dark-mode/findings.md            # 2-Action Rule
+Edit .plans/002-dark-mode/findings.md            # 2-Action Rule
 ```
 
 ---
@@ -90,29 +90,64 @@ Edit .plans/dark-mode/findings.md            # 2-Action Rule
 ## Goal
 Fix TypeError in validateToken() preventing successful login.
 
+## Building / Not Building
+**Building:** Fix the async user lookup path in validateToken(), add regression coverage, and update the affected auth fixture.
+**Not Building (out of scope):** Session storage redesign, provider migration, UI layout changes.
+
+## Approach
+Patch the missing await at the auth boundary, then update the mock fixture that models getUser(). Keep the fix inside the login validation path and prove it with the auth unit test plus a manual login smoke check.
+
+## Key Decisions
+| Decision | Rationale |
+|----------|-----------|
+| Fix validateToken() directly | The reproduced stack trace points to the auth validation path |
+| Update the getUser() mock fixture | The failing regression test uses the same async contract |
+
+## Premise Collapse
+- **Most fragile assumption:** validateToken() is the only caller that treats getUser() as a sync value.
+- **If it fails:** Other auth call sites may keep throwing TypeError after this patch.
+- **Mitigation:** Search all getUser() call sites and include the result in findings.md before editing.
+
+## External Dependencies
+| Dependency | Why needed | Source / owner | Reachability check | Status |
+|------------|------------|----------------|--------------------|--------|
+| Local test runner | Regression coverage | package.json `test` script | `npm test -- auth` | ready |
+
+## Verification Plan
+| Phase | Command | Expected outcome |
+|-------|---------|------------------|
+| Phase 1 | `rg "getUser\\(" src test` | All call sites reviewed |
+| Phase 2 | `npm test -- auth` | Auth tests pass |
+| Phase 3 | Manual login smoke | Login completes without TypeError |
+
+## Rollback
+Revert the validateToken() patch and fixture update in one commit if the regression test exposes a wider auth contract issue.
+
+---
+
 ## Current Phase
-Phase 3
+Phase 2
 
 ## Phases
 
-### Phase 1: Understand Bug Report
+### Phase 1: Reproduce and bound auth call sites
 - [x] Reproduce the error
 - [x] Locate auth handler: src/auth/login.ts
+- [x] Search getUser() call sites
+- **Verification:** `rg "getUser\\(" src test`
 - **Status:** complete
 
-### Phase 2: Identify Root Cause
+### Phase 2: Patch validateToken async handling
 - [x] Trace call chain
 - [x] Found: user object not awaited properly
-- **Status:** complete
-
-### Phase 3: Implement Fix
 - [ ] Fix async/await in validateToken()
 - [ ] Add error boundary
+- **Verification:** `npm test -- auth`
 - **Status:** in_progress
 
-### Phase 4: Test & Verify
-- [ ] Run unit tests
+### Phase 3: Login smoke verification
 - [ ] Manual login test
+- **Verification:** Manual login smoke
 - **Status:** pending
 
 ## Errors Encountered

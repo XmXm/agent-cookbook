@@ -41,12 +41,12 @@ Use this table schema in `review/index.md`:
 | Last Updated | YYYY-MM-DD |
 
 ## Open P0/P1 Findings
-| ID | Severity | Type | Round | Status | Finding | Evidence | Required Fix | Relocation Hint |
-|----|----------|------|-------|--------|---------|----------|--------------|-----------------|
+| ID | Severity | Action Class | Type | Round | Status | Finding | Evidence | Required Fix | Relocation Hint |
+|----|----------|--------------|------|-------|--------|---------|----------|--------------|-----------------|
 
 ## Resolved P0/P1 Findings
-| ID | Severity | Type | Found | Resolved | Finding | Evidence | Resolution Evidence |
-|----|----------|------|-------|----------|---------|----------|---------------------|
+| ID | Severity | Action Class | Type | Found | Resolved | Finding | Evidence | Resolution Evidence |
+|----|----------|--------------|------|-------|----------|---------|----------|---------------------|
 
 ## Round History
 | Round | File | Type | Mode | Open P0 | Open P1 | Resolved |
@@ -54,6 +54,19 @@ Use this table schema in `review/index.md`:
 ```
 
 Finding IDs use `R<N>-<severity>-<number>`, for example `R1-P0-1`. Code review findings also carry the same ID style and set `Type = Code`.
+
+### Action Class
+
+Every P0/P1 row carries an `Action Class` so downstream consumers (ship gates, fix-batchers, manual reviewers) know how to handle it without re-reading the finding:
+
+| Class | Definition |
+|-------|------------|
+| `safe_auto` | Unambiguous, risk-free fix: typos, missing imports, formatting, dead-code removal that has no callers |
+| `gated_auto` | Mechanical fix that changes behavior: null guards, error-path additions, adding a missing await — apply only after one explicit confirmation |
+| `manual` | Requires judgment: architecture change, behavior tradeoff, security tradeoff, API change |
+| `advisory` | Informational: pattern note, future-proofing suggestion, naming feedback |
+
+Agents writing findings MUST select an Action Class. If a finding cannot be classified (e.g., "this might be a problem, not sure how to fix"), the finding is too vague to merge — push back to the agent for sharper evidence.
 
 ## Core Principles
 
@@ -81,6 +94,11 @@ Check the user's message for explicit code review signals:
 ```
 mkdir -p "$PLAN_DIR/review"
 Read "$PLAN_DIR/review/index.md" if present.
+Normalize legacy `review/index.md` schemas before reading rows:
+- If `Open P0/P1 Findings` lacks `Action Class`, insert it after `Severity`.
+- If `Resolved P0/P1 Findings` lacks `Action Class`, insert it after `Severity`.
+- Backfill legacy rows with `manual` unless the row evidence clearly maps to `safe_auto`, `gated_auto`, or `advisory`.
+- Preserve IDs, status, evidence, and round history exactly; add a metadata note `Schema Normalized = YYYY-MM-DD` when a migration happened.
 List "$PLAN_DIR/review"/R*.md and find the highest round number.
 ```
 
@@ -103,7 +121,23 @@ This is the most important step. Do NOT skip or rush it.
 
 Read the full task/section under review in `$PLAN_DIR/task_plan.md`. Also read relevant sections of `$PLAN_DIR/findings.md` (prior research, data dependencies) and `$PLAN_DIR/progress.md` (what's done vs remaining).
 
-**1b. Build your mental model**
+**1b. Extract project context**
+
+Beyond the plan files, read enough public project context that agents can ground judgments in real constraints rather than the plan's self-description:
+
+1. Read repo-root docs that describe project conventions: `README.md`, `AGENTS.md`, `CLAUDE.md`, design docs under `docs/`
+2. Read manifests and lockfiles relevant to the plan area: `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `tauri.conf.json`, `.csproj`, etc.
+3. Read CI / build / release config that names verification commands or generated artifacts: `.github/workflows/*`, `Makefile`, build scripts
+4. Compress findings into a **Project Context** block that becomes part of every agent's Context Block:
+   - Verification commands the project actually uses (test, lint, build)
+   - Generated or bundled outputs that must stay in sync with sources
+   - Release artifacts and version fields
+   - Domain-specific risk areas the project documents
+   - Stricter rule wins where project context overlaps with this skill
+
+If project docs name a verification command, prefer that over auto-detection.
+
+**1c. Build your mental model**
 
 Before composing any agent prompt, you must be able to answer:
 - What is this plan trying to achieve? What's the core transformation?
@@ -112,7 +146,7 @@ Before composing any agent prompt, you must be able to answer:
 - What domain knowledge is required? (threading model, language constraints, API contracts, etc.)
 - What does the plan explicitly say it will NOT do? (scope boundaries)
 
-**1c. Determine review scale**
+**1d. Determine review scale**
 
 | Signal | Scale | Agent count |
 |--------|-------|-------------|
@@ -124,9 +158,22 @@ For **Light** plans, go to **[Inline Review]**.
 
 ### Step 2: Generate Review Dimensions
 
-Do NOT pick from a fixed menu. Derive from what you read:
+Do NOT pick from a fixed menu. Derive from what you read.
 
-1. Identify the plan's **top 3-5 risk areas** (what's most likely to go wrong)
+**2a. Mandatory dimensions (always covered)**
+
+If `task_plan.md` contains these structured sections, R1 must include one dimension targeting each — these are the load-bearing surfaces of the plan and are the easiest to under-review with ad-hoc agents:
+
+- **Premise Collapse coverage** — read the `Premise Collapse` section. Generate one dimension whose explicit purpose is to attack that fragile assumption with codebase evidence: does the assumption actually hold in the current code? What other code paths depend on it? What does the codebase look like if the assumption is wrong?
+- **External Dependencies coverage** — read the `External Dependencies` section. Generate one dimension that verifies, for each listed dependency: reachability, auth model, timeout/retry posture, failure-mode handling, and whether the plan covers degradation when the dependency is unavailable.
+
+If the plan does not have these sections (older plans, light mode), still produce equivalent dimensions by inference: scan the plan for its most fragile assumption and its external touchpoints, then generate the same two dimensions from inferred content.
+
+**2b. Plan-specific dimensions**
+
+In addition to the mandatory dimensions:
+
+1. Identify the plan's **top 3-5 risk areas** (what's most likely to go wrong) beyond Premise Collapse and External Dependencies
 2. For each risk, formulate a **review dimension**:
    - A descriptive name (e.g., "Cross-thread data consistency", "API call-site coverage completeness")
    - 4-6 specific verification questions for codebase search
@@ -174,13 +221,32 @@ When all agents complete:
 1. **Read all results** carefully — don't concatenate
 2. **Deduplicate**: Same issue from multiple agents → merge, cite all evidence, take highest severity
 3. **Validate**: Use your deep-read understanding to sanity-check. Reject false positives. Upgrade missed P0s.
-4. **Write `$PLAN_DIR/review/R1.md`** with P0/P1/P2 graded findings, review setup, evidence, impact, and required fixes.
+4. **Write `$PLAN_DIR/review/R1.md`** with P0/P1/P2 graded findings, review setup, evidence, impact, and required fixes. End the file with the **Sign-off** block defined below.
 5. **Update `$PLAN_DIR/review/index.md`**:
    - Add each P0/P1 to `Open P0/P1 Findings`
-   - Include `ID`, `Severity`, `Type`, `Round`, `Status`, `Finding`, `Evidence`, `Required Fix`, and `Relocation Hint`
+   - Include `ID`, `Severity`, `Action Class`, `Type`, `Round`, `Status`, `Finding`, `Evidence`, `Required Fix`, and `Relocation Hint`
    - Use `doc_line_hint` as the relocation hint, for example `BehaviorLockSnapshot struct`
    - Add a `Round History` row pointing to `review/R1.md`
 6. **Output a concise report** and include the report path.
+
+### Sign-off Block (every round report)
+
+Every R*.md (plan review or code review) ends with a fenced sign-off block. This is the at-a-glance state for downstream consumers (ship gates, the iteration round flow, human reviewers):
+
+```
+plan section:    [section / task reviewed]
+review depth:    light / standard / heavy
+mode:            R1 / R2-verify / R2-new / R2-mixed / Mode D code
+project context: [yes — list key sources extracted, or none]
+mandatory dims:  premise-collapse=[covered/inferred], external-deps=[covered/inferred/none]
+specialists:     [security, architecture, adversarial, ...] or none
+hard stops:      N found, N requiring fix, N waived (with reason)
+verification:    [Mode D only: <command> -> pass / fail / none -- no command available]
+findings:        P0=N P1=N P2=N
+open after:      P0=N P1=N
+```
+
+If a row does not apply (e.g., `verification` for plan-only review), write `n/a`. Never omit a row; missing rows are read as "not done" by downstream tooling.
 
 ---
 
@@ -252,7 +318,7 @@ All in one message, all `run_in_background: true`. Name format: `r[N]-verify-[di
 
 2. **New findings** (Mode B/C): Add new P0/P1 rows to `Open P0/P1 Findings` with current round number
 
-3. **Write the round report** to `$PLAN_DIR/review/R[N].md` with this format:
+3. **Write the round report** to `$PLAN_DIR/review/R[N].md` with this format, ending with the **Sign-off Block** defined in the R1 section:
    ```markdown
    # R[N] Review Report — [Mode Name]
 
@@ -268,6 +334,20 @@ All in one message, all `run_in_background: true`. Name format: `r[N]-verify-[di
 
    ## Summary
    Open P0: [count] | Open P1: [count] | Resolved this round: [count]
+
+   ## Sign-off
+   ~~~
+   plan section:    ...
+   review depth:    ...
+   mode:            ...
+   project context: ...
+   mandatory dims:  ...
+   specialists:     ...
+   hard stops:      ...
+   verification:    ...
+   findings:        ...
+   open after:      ...
+   ~~~
    ```
 
 4. **Update `review/index.md`** with the new open/resolved counts and a `Round History` row.
@@ -293,13 +373,34 @@ When an agent is tasked with verifying a fix (Mode A or C), it must NOT just rea
 ### Verification verdict per finding:
 
 ```
-Resolved     — [code evidence confirming the fix is correct]
+Resolved     — [code evidence confirming the fix addresses every Impact dimension of the original finding]
 Partial      — [what's fixed + what's still missing, with code evidence]
 Unresolved   — [why the fix doesn't work, with code evidence]
 New Issue    — [the fix itself introduced a new problem]
 ```
 
 The agent MUST provide file:line evidence for every verdict. "The plan says it's fixed" is not evidence.
+
+### Hypothesis Quality Gate
+
+`Resolved` is the highest bar. Before declaring `Resolved`, the agent must satisfy this gate:
+
+> The fix evidence must explain **every Impact dimension** listed in the original finding, not just the symptom that was easiest to address.
+
+Concretely:
+- If the original finding's Impact reads "thread-safety, callsite coverage, and replica sync correctness", the verdict must produce evidence for all three. Evidence for thread-safety alone = `Partial`, not `Resolved`.
+- If the agent cannot enumerate every Impact dimension from the finding, the finding itself was too vague — flag this as a meta-issue and downgrade the verdict to `Partial` until the gap is sharpened.
+- A `Resolved` verdict that addresses only part of Impact is the most expensive failure mode in iterative review: it closes the row, hides residual risk, and the next round won't re-examine it.
+
+### Same-Symptom Re-emergence Rule
+
+If a finding marked `Resolved` in a prior round reappears in the current round (same symptom, possibly at a different file:line), this is a hard signal that the prior fix was symptom-level. Do not simply re-open with a fresh ID:
+
+1. Reference the prior `R<N>-P*-N` ID in the new finding's Required Fix
+2. Escalate the new finding to P0 regardless of its narrow severity
+3. Require the agent's Required Fix to address the **mechanism** that allowed the symptom to recur, not just the new instance
+
+Same symptom after a fix means the hypothesis was wrong, not that the implementation was sloppy.
 
 ---
 
@@ -352,3 +453,10 @@ Use the mirror only after the file-backed state is updated.
 8. **Plan-text-only verification**: Saying "the plan now says sealed class so P0-1 is fixed" without grepping the codebase is lazy verification. The Verification Agent Protocol exists to prevent this.
 9. **Diff-only code review**: Reading only the diff without understanding the surrounding code produces shallow findings. Always read the full file context for non-trivial changes.
 10. **Plan-code disconnect**: Reviewing code without reading the corresponding plan section. The plan defines what "correct" means — without it, you're just linting.
+11. **Skipping mandatory dimensions**: Premise Collapse and External Dependencies coverage in R1 are not optional. Skipping them because "the plan looks straightforward" is exactly when load-bearing assumptions go un-checked.
+12. **Skipping the Hard Stop sweep in Mode D**: The Hard Stop sweep agent runs every Code Review run, even on tiny diffs. The categories it checks (version skew, generated artifact drift, unknown identifiers, secret exposure) are not visible from "looks unrelated" judgments.
+13. **Folding drift into code-quality P2s**: Plan↔code drift is a first-class finding, not a style issue. Surface it in the Change Summary, not buried in P2 observations.
+14. **Action-class-less findings**: Every P0/P1 must declare an Action Class. A finding that cannot be classified is too vague to merge.
+15. **Closing a row that addresses only part of Impact**: `Resolved` requires evidence for every Impact dimension of the original finding. Partial fixes get `Partial`, not `Resolved`. The Hypothesis Quality Gate exists to prevent silent residual risk.
+16. **Skipping the sign-off block**: Every R*.md ends with the sign-off block. Missing rows are read as "not done" by downstream consumers. Write `n/a` if a row genuinely does not apply.
+17. **Mode D without a verification command**: A code review report with `verification: none` is a structural gap, not a pass. Flag it explicitly; do not declare the round done.

@@ -13,6 +13,7 @@ from pathlib import Path
 
 ROOT = Path(".")
 SKILLS_DIR = ROOT / "skills"
+LEGACY_DIR = ROOT / "legacy"
 RESOLVER = SKILLS_DIR / "RESOLVER.md"
 
 
@@ -98,8 +99,8 @@ if (SKILLS_DIR / "brainstorming").exists():
 if (SKILLS_DIR / "systematic-debugging").exists():
     fail("LEGACY MOVE INCOMPLETE: skills/systematic-debugging still exists")
 for legacy in ("brainstorming", "systematic-debugging"):
-    if not (SKILLS_DIR / "legacy" / legacy / "SKILL.md").exists():
-        fail(f"LEGACY SKILL MISSING: skills/legacy/{legacy}/SKILL.md")
+    if not (LEGACY_DIR / legacy / "SKILL.md").exists():
+        fail(f"LEGACY SKILL MISSING: legacy/{legacy}/SKILL.md")
 print("ok: legacy parking")
 
 if not RESOLVER.exists():
