@@ -1,7 +1,7 @@
 ---
 name: cs-style-check
 model: haiku
-inject_context: none
+context: fork
 description: Scan C# code for coding style violations against loaded csharp rules. Use this skill when the user says "check style", "lint cs", "style check", "cs-style-check", "检查风格", "看看命名", or asks to review C# code formatting/naming compliance. Also trigger proactively before committing C# changes, after a commit, or during code review when style compliance matters. Default (no args) scans uncommitted git changes; pass a commit ref (e.g. HEAD, HEAD~1, abc1234) to scan a specific commit.
 ---
 

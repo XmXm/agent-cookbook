@@ -75,6 +75,7 @@ Agents writing findings MUST select an Action Class. If a finding cannot be clas
 3. **File-backed findings**: Use `$PLAN_DIR/review/index.md` to register each P0/P1 with doc location, code evidence, required fix, status, and relocation hint. This file is the cross-round memory.
 4. **R1 = wide + deep; R2+ = narrow + deeper**: First round covers everything thoroughly. Subsequent rounds focus on what changed.
 5. **Code-verified findings**: Every finding must be backed by codebase evidence. Verification agents must search code to cross-validate, not just read the plan text.
+6. **Document language follows session language**: All review output files (index.md, R*.md) must be written in the same language the user is currently using in the conversation. Default to Chinese (中文) when the session language is ambiguous or mixed. Technical identifiers (file paths, code references, field names) remain in their original form.
 
 ---
 

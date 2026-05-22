@@ -346,6 +346,9 @@ TBD, TODO, "implement later", "similar to step N", "details to be determined" ar
 ### 9. External Dependencies Upfront
 Every API key name, env var name, MCP server, third-party CLI, OAuth flow, and credential owner must be listed in `External Dependencies` and verified reachable **before Phase 1 starts**. Secret values stay in the environment or secret manager; the plan stores names, ownership, paths, and redacted status.
 
+### 10. Document Language Follows Session Language
+Planning documents (task_plan.md, findings.md, progress.md) must be written in the same language the user is currently using in the conversation. If the user speaks Chinese, write the plan in Chinese; if English, write in English. Default to Chinese (中文) when the session language is ambiguous or mixed. Technical identifiers (file paths, code, command names) remain in their original form regardless of document language.
+
 ## The 3-Strike Error Protocol
 
 ```
