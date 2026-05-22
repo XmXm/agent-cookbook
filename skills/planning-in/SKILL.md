@@ -232,6 +232,11 @@ The template is split into a **design header** (must be filled before phases) an
 ## Current Phase
 Phase 1
 
+<!-- TERMINOLOGY NOTE:
+     "Phase 1/2/3/4" = implementation stages (here).
+     "P0/P1/P2" = review severity (planning-review skill only).
+     Never abbreviate phases as P1/P2 — that collides with review severity. -->
+
 ## Phases
 
 ### Phase 1: [Concrete name derived from Approach]
@@ -429,6 +434,7 @@ If you can answer these, your context management and design memory are solid:
 | Skip Premise Collapse and jump to tasks | State the most fragile assumption explicitly; let the design survive its failure |
 | Ask the user for an API key mid-Phase 3 | List every credential in External Dependencies before Phase 1 starts |
 | Leave TBD / TODO in the design header | A plan with placeholders is a promise to plan later — fill it now or stop |
+| Abbreviate "Phase 1" as "P1" | Always write "Phase 1" in full — "P1" means review severity (planning-review) |
 
 ## Scripts
 

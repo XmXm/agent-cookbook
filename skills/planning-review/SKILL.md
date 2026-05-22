@@ -9,6 +9,20 @@ disable-model-invocation: true
 
 Organize a parallel Agent Review Team to audit planning documents or implemented code. Supports plan review (R1 and R2+ iteration) and code review of completed tasks. Every invocation auto-detects round number and review type, then starts the appropriate flow.
 
+## Terminology Disambiguation
+
+Two separate numbering systems exist across the planning skills — never conflate them:
+
+| Namespace | Format | Meaning | Example |
+|-----------|--------|---------|---------|
+| **Review Severity** | P0 / P1 / P2 | Finding priority in review rounds | `R1-P0-1` = Round 1, severity P0, finding #1 |
+| **Implementation Phase** | Phase 1 / Phase 2 / … | Execution stage in `task_plan.md` | "Phase 2: Integration" |
+
+- `P0` = critical review finding that blocks implementation. It is NOT "Phase 0".
+- `Phase 1` = first implementation stage. It is NOT a severity level.
+- When referencing review severity, always use the full prefix: `P0`, `P1`, `P2`.
+- When referencing implementation progress, always use the full word: `Phase 1`, `Phase 2`, etc. Never abbreviate to `P1`/`P2`.
+
 ## Directory Resolution
 
 Follow the shared Directory Resolution rules to determine `PLAN_DIR`: scan `.plans/` for subdirectories containing `task_plan.md`. Single match → use it. Multiple → ask user.
