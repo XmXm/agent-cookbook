@@ -34,6 +34,7 @@ appears here and that every listed active skill exists.
 |---|---|
 | Writing, editing prose, release notes, bilingual polish | `skills/write/SKILL.md` |
 | Push a local Markdown file to Notion | `skills/notion-md-sync/SKILL.md` |
+| Send a DM message to a Lark app bot as the logged-in user | `skills/lark-send-to-bot/SKILL.md` |
 
 ### Git Convenience
 

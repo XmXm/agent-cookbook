@@ -7,8 +7,13 @@ block, and emit a processed copy with each fence replaced by:
 
 Outputs:
     <input>.processed.md       — the rewritten markdown, suitable for
-                                 `lark-cli docs +create/+update --doc-format
-                                 markdown --content @<file>.processed.md`
+                                 `lark-cli docs +create --api-version v2
+                                 --content @<file>.processed.md --doc-format
+                                 markdown` (or `+update --api-version v2
+                                 --command overwrite|append --content
+                                 @<file>.processed.md --doc-format markdown`).
+                                 Note: the @<file> path MUST be relative to
+                                 the current working directory.
     <input>.mermaid_blocks.json — JSON array; each item:
                                  {id, code, fence_lang, line_start, line_end}
 

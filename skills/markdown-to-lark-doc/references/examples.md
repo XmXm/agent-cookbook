@@ -40,47 +40,49 @@ mindmap
 
 > 注：上面的 ` ​``` ` 是为了在本 reference 中展示，实际 md 用普通三重反引号。
 
-## 完整命令链
+## 完整命令链（新建）
 
 ```bash
 # Step 0 — 环境校验
 lark-cli --version
 npx -y @larksuite/whiteboard-cli@^0.2.11 -v
 
-# Step 1 — 抽 mermaid
-python3 scripts/extract_mermaid.py /tmp/demo.md
-# stdout: {"processed_md":"/tmp/demo.processed.md","blocks_json":"/tmp/demo.mermaid_blocks.json","block_count":2}
+# Step 1 — 抽 mermaid（先 cd 到 md 所在目录，后续 @file 都是相对路径）
+cd ~/docs
+python3 ~/.agents/skills/markdown-to-lark-doc/scripts/extract_mermaid.py demo.md
+# stdout: {"processed_md":"demo.processed.md","blocks_json":"demo.mermaid_blocks.json","block_count":2}
 
-# Step 2 + 3 — 新建文档
+# Step 2 + 3 — 新建文档（默认放入个人 wiki）
 lark-cli docs +create \
   --api-version v2 \
+  --parent-position my_library \
+  --content @demo.processed.md \
   --doc-format markdown \
-  --content @/tmp/demo.processed.md \
   --as user \
-  > /tmp/demo.create_resp.json
+  > demo.create_resp.json
 
 # 检查响应
-jq '.data.document.url' /tmp/demo.create_resp.json
-# → "https://xxx.feishu.cn/docx/doxcnAbCdEf..."
+jq '.data.document.url' demo.create_resp.json
+# → "https://xxx.feishu.cn/docx/Lcp2..."
 
-jq '.data.document.new_blocks[] | select(.block_type=="whiteboard")' /tmp/demo.create_resp.json
-# → 两条 {block_id, block_type:"whiteboard", block_token:"wbcn..."}
+jq '.data.document.new_blocks[] | select(.block_type=="whiteboard")' demo.create_resp.json
+# → 两条 {block_id, block_type:"whiteboard", block_token:"..."}
 
 # Step 4 — 对齐
-python3 scripts/stitch_boards.py \
-  --blocks /tmp/demo.mermaid_blocks.json \
-  --response /tmp/demo.create_resp.json \
+python3 ~/.agents/skills/markdown-to-lark-doc/scripts/stitch_boards.py \
+  --blocks demo.mermaid_blocks.json \
+  --response demo.create_resp.json \
   --basename demo \
-  > /tmp/demo.stitched.json
+  > demo.stitched.json
 
-cat /tmp/demo.stitched.json
+cat demo.stitched.json
 # [
-#   {"mmd_id":0,"code":"sequenceDiagram\n...","board_token":"wbcn...","block_id":"...","idempotent_token":"1747600000-demo-0"},
-#   {"mmd_id":1,"code":"mindmap\n...","board_token":"wbcn...","block_id":"...","idempotent_token":"1747600000-demo-1"}
+#   {"mmd_id":0,"code":"sequenceDiagram\n...","board_token":"...","block_id":"...","idempotent_token":"1747600000-demo-0"},
+#   {"mmd_id":1,"code":"mindmap\n...","board_token":"...","block_id":"...","idempotent_token":"1747600000-demo-1"}
 # ]
 
 # Step 5 — 逐个写画板
-jq -c '.[]' /tmp/demo.stitched.json | while read row; do
+jq -c '.[]' demo.stitched.json | while read row; do
   TOKEN=$(echo "$row" | jq -r .board_token)
   IDEM=$(echo "$row"  | jq -r .idempotent_token)
   ID=$(echo "$row"    | jq -r .mmd_id)
@@ -100,8 +102,17 @@ jq -c '.[]' /tmp/demo.stitched.json | while read row; do
         --as user
 done
 
-# Step 7 — 汇报
-echo "Doc: $(jq -r .data.document.url /tmp/demo.create_resp.json)"
+# Step 7 — 验证文档完整性
+lark-cli docs +fetch --api-version v2 --doc "$(jq -r .data.document.document_id demo.create_resp.json)" --as user 2>/dev/null \
+  | python3 -c "
+import json, re, sys
+doc = json.load(sys.stdin)['data']['document']
+content = doc.get('content', '')
+print(f'text_chars={len(re.sub(r\"<whiteboard[^>]*></whiteboard>|<title>.*?</title>\", \"\", content).strip())}, whiteboards={len(re.findall(r\"<whiteboard\", content))}, title={re.findall(r\"<title>(.*?)</title>\", content)}')
+"
+
+# Step 8 — 汇报
+echo "Doc: $(jq -r .data.document.url demo.create_resp.json)"
 ```
 
 ## 追加模式（向已有文档）
@@ -109,16 +120,32 @@ echo "Doc: $(jq -r .data.document.url /tmp/demo.create_resp.json)"
 把 Step 2+3 改成：
 
 ```bash
-DOC="https://xxx.feishu.cn/docx/doxcnExistingDoc"
+DOC="https://xxx.feishu.cn/docx/Lcp2..."   # docx URL / wiki URL / document_id 都行
 
 lark-cli docs +update \
   --api-version v2 \
   --doc "$DOC" \
   --command append \
+  --content @demo.processed.md \
   --doc-format markdown \
-  --content @/tmp/demo.processed.md \
   --as user \
-  > /tmp/demo.update_resp.json
+  > demo.update_resp.json
 ```
 
-后续 Step 4/5/7 不变；`stitch_boards.py` 同样从 `data.document.new_blocks[]` 里取新追加的画板（已有 block 不会被列入 new_blocks）。
+## 全文替换模式（清空原文档后整篇覆盖）
+
+```bash
+lark-cli docs +update \
+  --api-version v2 \
+  --doc "$DOC" \
+  --command overwrite \
+  --content @demo.processed.md \
+  --doc-format markdown \
+  --as user \
+  > demo.update_resp.json
+```
+
+> stderr 会给警告：`the document contains N whiteboard blocks that cannot be reconstructed from Markdown; overwrite will permanently delete them`。如果之前文档里有手工画的画板，全文替换会全部清掉。
+> 要改标题：直接改 demo.md 的首行 `# Title`，v2 没有显式 title 旗子。
+
+后续 Step 4/5/7 不变；`stitch_boards.py` 同样从 `data.document.new_blocks[]` 里取新写入的画板（已有 block 不会被列入 new_blocks）。
