@@ -8,3 +8,8 @@
 	url = git@github.com:mattpocock/skills.git
 	branch = main
 	update = merge
+[submodule "refs/lark-skills"]
+	path = refs/lark-skills
+	url = git@github.com:larksuite/cli.git
+	branch = main
+	update = merge
