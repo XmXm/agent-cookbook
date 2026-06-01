@@ -13,7 +13,8 @@ fi
 SLUG="$1"
 # Auto-number: find highest NNN in .plans/ and increment
 HIGHEST=$(ls -d .plans/[0-9]* 2>/dev/null | sed 's|.plans/||' | sed 's/-.*//' | sort -n | tail -1)
-NEXT=$((${HIGHEST:-0} + 1))
+# Force base-10 to avoid bash interpreting leading-zero numbers like 020 as octal.
+NEXT=$((10#${HIGHEST:-0} + 1))
 NUM=$(printf "%03d" $NEXT)
 
 PLAN_NAME="${NUM}-${SLUG}"
