@@ -91,6 +91,16 @@ Agents writing findings MUST select an Action Class. If a finding cannot be clas
 5. **Code-verified findings**: Every finding must be backed by codebase evidence. Verification agents must search code to cross-validate, not just read the plan text.
 6. **Document language follows session language**: All review output files (index.md, R*.md) must be written in the same language the user is currently using in the conversation. Default to Chinese (中文) when the session language is ambiguous or mixed. Technical identifiers (file paths, code references, field names) remain in their original form.
 
+## Child Agent Selection Rule
+
+Do not use review child agents with implicit/default file reads. In particular,
+planning-review must never depend on root-level `plan.md` or `progress.md`
+conventions. Child agents must receive `$PLAN_DIR/task_plan.md`,
+`$PLAN_DIR/progress.md`, `$PLAN_DIR/findings.md`, and scoped code/diff paths
+explicitly in their prompt. If a runtime cannot prevent a candidate child agent
+from auto-reading unrelated default files, choose a no-default-read role or fall
+back to inline review.
+
 ---
 
 ## Entry Point: Auto-Detect Round & Mode

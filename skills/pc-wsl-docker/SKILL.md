@@ -1,6 +1,6 @@
 ---
 name: pc-wsl-docker
-description: Manage Docker containers and Compose stacks on the user's remote Windows PC that runs Docker inside WSL Debian, exposed to the LAN through Windows portproxy via `sync-ports.bat`. Use this whenever the user asks to start/stop/inspect a container, change a docker-compose stack, expose a service to the LAN, or do anything container-related on "PC", "我的电脑", "那台电脑", "the WSL box", "the home server", or any remote docker host reached via `ssh mt-pc`. Trigger even when the user does not explicitly mention WSL or portproxy — if the task is container CRUD or compose management and the target is not the local machine, default to this skill.
+description: Manage Docker containers and Compose stacks on the user's remote Windows PC that runs Docker inside WSL Debian, exposed to the LAN through Windows portproxy via `sync-ports.bat`. Use this whenever the user asks to start/stop/inspect a container, change a docker-compose stack, expose a service to the LAN, or do anything container-related on "PC", "我的电脑", "那台电脑", "the WSL box", "the home server", or any remote docker host reached via `ssh mt-pc` or direct WSL SSH `ssh mt-wsl`. Trigger even when the user does not explicitly mention WSL or portproxy — if the task is container CRUD or compose management and the target is not the local machine, default to this skill.
 ---
 
 # pc-wsl-docker
@@ -12,7 +12,7 @@ Operate Docker on the remote Windows PC where:
 - Containers publish ports only to `127.0.0.1:<port>` inside WSL.
 - A Windows-side script `sync-ports.bat` mirrors every published port to `0.0.0.0:<port>` on the Windows host via `netsh portproxy`, making it reachable from the LAN.
 
-Everything goes through one entry point: **`ssh mt-pc`**.
+Use **`ssh mt-pc`** for Windows-side administration and portproxy sync. Use **`ssh mt-wsl`** for a direct shell inside WSL Debian after portproxy is healthy.
 
 ## Why the workflow exists
 
@@ -31,14 +31,16 @@ This means: **every time published ports change, `sync-ports.bat` must run** —
 | --- | --- |
 | Shell on PC (lands in MINGW64 / git-bash, already Admin) | `ssh mt-pc` |
 | One-shot Windows-side command | `ssh mt-pc '<bash-cmd>'` |
-| One-shot Docker command in WSL | `ssh mt-pc 'wsl -d Debian -- docker <args>'` |
-| Multi-line bash inside WSL (login shell, paths resolved) | `ssh mt-pc 'wsl -d Debian -- bash -lic "<cmd>"'` |
+| Direct WSL Debian shell | `ssh mt-wsl` |
+| One-shot Docker command in WSL | `ssh mt-wsl 'docker <args>'` or `ssh mt-pc 'wsl -d Debian -- docker <args>'` |
+| Multi-line bash inside WSL (login shell, paths resolved) | `ssh mt-wsl 'bash -lic "<cmd>"'` or `ssh mt-pc 'wsl -d Debian -- bash -lic "<cmd>"'` |
 | Re-sync portproxy after any port change | `ssh mt-pc 'sync-ports.bat'` |
 | Preview what sync would do | `ssh mt-pc 'sync-ports.bat -WhatIf'` |
 
 Notes:
 
 - The default SSH shell is MINGW64. Use `cat` / `ls` / forward slashes; Windows paths work as `/c/...`.
+- `ssh mt-wsl` connects to WSL Debian as user `zyx` through Windows portproxy on public port `2222`; WSL `sshd` listens on `2222` and uses public-key auth only.
 - `sync-ports.bat` is on `PATH` (`C:\bin\sync-ports.bat`) — call it bare.
 - The script auto-elevates via UAC, but the `ssh mt-pc` session already runs as Administrator, so it just works headless.
 
@@ -51,8 +53,8 @@ For **every** container-related request that targets the PC, follow this loop. D
 Always start by listing what exists so you don't clobber anything:
 
 ```bash
-ssh mt-pc 'wsl -d Debian -- docker ps -a'
-ssh mt-pc 'wsl -d Debian -- bash -lic "ls ~/docker/"'
+ssh mt-wsl 'docker ps -a'
+ssh mt-wsl 'bash -lic "ls ~/docker/"'
 ```
 
 ### 2. Make the change
@@ -60,14 +62,14 @@ ssh mt-pc 'wsl -d Debian -- bash -lic "ls ~/docker/"'
 **For ad-hoc containers** (`docker run`, `stop`, `rm`, `exec`, `logs`, …):
 
 ```bash
-ssh mt-pc 'wsl -d Debian -- docker run -d --name foo -p 127.0.0.1:18080:80 nginx:alpine'
-ssh mt-pc 'wsl -d Debian -- docker logs -n 50 foo'
+ssh mt-wsl 'docker run -d --name foo -p 127.0.0.1:18080:80 nginx:alpine'
+ssh mt-wsl 'docker logs -n 50 foo'
 ```
 
 **For compose stacks**, work inside `~/docker/<stack>/`:
 
 ```bash
-ssh mt-pc 'wsl -d Debian -- bash -lic "mkdir -p ~/docker/myapp && cat > ~/docker/myapp/compose.yaml << EOF
+ssh mt-wsl 'bash -lic "mkdir -p ~/docker/myapp && cat > ~/docker/myapp/compose.yaml << EOF
 services:
   app:
     image: ...
@@ -108,10 +110,10 @@ Confirm both layers actually work:
 
 ```bash
 # Container is up
-ssh mt-pc 'wsl -d Debian -- docker ps --filter name=<container>'
+ssh mt-wsl 'docker ps --filter name=<container>'
 
 # WSL loopback responds
-ssh mt-pc 'wsl -d Debian -- curl -s -o /dev/null -w "wsl=%{http_code}\n" http://127.0.0.1:<port>/'
+ssh mt-wsl 'curl -s -o /dev/null -w "wsl=%{http_code}\n" http://127.0.0.1:<port>/'
 
 # Windows public-facing portproxy is in place
 ssh mt-pc 'netsh interface portproxy show all'
@@ -129,12 +131,12 @@ Report what you observed, not what you expected.
 - **`restart: unless-stopped`**: every long-lived stack.
 - **Volumes**: named volumes for data, bind-mounts only when the user needs to edit files from Windows (path: `/mnt/c/...`).
 - **Reserved ports**: do not publish on `80`, `443`, `2019`, `8090` — Caddy owns those and `sync-ports.bat` excludes them on purpose.
-- **Pinned port `9000`**: stays in portproxy even when Docker is down. Don't repurpose it without telling the user.
+- **Pinned ports**: `9000` stays in portproxy even when Docker is down; `2222` is reserved for direct `ssh mt-wsl`. Don't repurpose either without telling the user.
 
 ## Tearing down
 
 ```bash
-ssh mt-pc 'wsl -d Debian -- bash -lic "cd ~/docker/<stack> && docker compose down"'
+ssh mt-wsl 'bash -lic "cd ~/docker/<stack> && docker compose down"'
 # Add -v only if the user confirmed volumes should be wiped
 ssh mt-pc 'sync-ports.bat'
 ```
@@ -142,7 +144,7 @@ ssh mt-pc 'sync-ports.bat'
 For ad-hoc containers:
 
 ```bash
-ssh mt-pc 'wsl -d Debian -- docker rm -f <name>'
+ssh mt-wsl 'docker rm -f <name>'
 ssh mt-pc 'sync-ports.bat'
 ```
 
