@@ -80,6 +80,18 @@ Each plan is independent — own directory under `.plans/`, own files. Active pl
 
 Completed plans stay in `.plans/` alongside active ones — distinguished by phase status, not by directory location.
 
+### Archiving a plan
+
+To retire a plan without deleting it (abandoned, superseded, or rolled into another plan), move it under `.plans/archive/`. `discover_plan_dirs()` excludes the `archive/` (and `active/`) staging dirs, so archived plans drop out of the dashboard and index while their files stay on disk:
+
+```bash
+mkdir -p .plans/archive
+git mv .plans/<NNN-name> .plans/archive/<NNN-name>   # or plain mv if not tracked
+python3 ~/.claude/skills/planning-in/scripts/plans-index.py rebuild
+```
+
+Archiving differs from `planning-in-remove`: archive **keeps** the files (recoverable by moving back out of `archive/`), remove **deletes** them. Prefer archive for any plan you might want to revisit.
+
 ### Global Index (`.plans/_index.json`)
 
 A cache of plan metadata: title, current phase, completion progress, error
@@ -93,6 +105,26 @@ count, file sizes, timestamps, aggregate status (`pending` / `in_progress` /
 The index is **always derivable from disk** — if it goes missing or stale,
 run `python3 scripts/plans-index.py rebuild`. Skills should treat it as a
 fast-path and fall back to scanning `.plans/` if it's unreadable.
+
+### Status vocabulary (canonical tokens)
+
+Each phase's `**Status:**` field MUST use exactly one of these tokens — they are
+states, not past-tense verbs:
+
+| token | meaning | dashboard icon |
+|-------|---------|----------------|
+| `pending` | not started | ⏸️ |
+| `in_progress` | actively being worked | 🔄 |
+| `complete` | finished | ✅ |
+| `blocked` / `failed` | stuck or failed | ❌ |
+
+**Write `complete`, never `completed`.** `plans-index.py` matches the token with
+exact equality (`status == "complete"`), so `completed` is silently NOT counted
+as done — the phase reverts to `pending` in the dashboard even though it looks
+finished. (Worse, `check-complete.sh` uses a substring grep that *does* accept
+`completed`, so the two tools disagree.) Mirror the same set in the dir-tree
+comments and in `progress.md`. When in doubt, copy the token from
+`STATUS_ICONS` in `scripts/plans-index.py` — that map is the source of truth.
 
 ## Pre-flight (Before Creating Files)
 
@@ -244,6 +276,8 @@ Phase 1
 - [ ] [Specific action]
 - **Verification:** [exact command, must match Verification Plan row]
 - **Status:** in_progress
+<!-- Status token MUST be one of: pending | in_progress | complete | blocked | failed.
+     Write "complete", NOT "completed" — the index parser matches it exactly. -->
 
 <!-- Add additional phases as the work naturally splits.
      Do NOT pad to 5 phases. A bug fix may need 2; a refactor may need 6.
