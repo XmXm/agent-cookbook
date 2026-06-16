@@ -18,11 +18,20 @@ if [[ ${#submodules[@]} -eq 0 ]]; then
   exit 0
 fi
 
+echo "Discovered ${#submodules[@]} refs submodules:"
+for path in "${submodules[@]}"; do
+  branch="$(git config -f .gitmodules --get "submodule.${path}.branch" || true)"
+  branch="${branch:-main}"
+  echo "  - ${path} -> origin/${branch}"
+done
+echo
+
 for path in "${submodules[@]}"; do
   branch="$(git config -f .gitmodules --get "submodule.${path}.branch" || true)"
   branch="${branch:-main}"
 
   echo "==> Updating ${path} to origin/${branch}"
+  git submodule sync -- "${path}"
   git submodule update --init -- "${path}"
   git -C "${path}" fetch origin "${branch}"
   git -C "${path}" checkout "${branch}"

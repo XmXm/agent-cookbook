@@ -13,3 +13,8 @@
 	url = git@github.com:larksuite/cli.git
 	branch = main
 	update = merge
+[submodule "refs/hai-stack"]
+	path = refs/hai-stack
+	url = git@github.com:hylarucoder/hai-stack.git
+	branch = main
+	update = merge
