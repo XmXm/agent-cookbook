@@ -35,7 +35,7 @@ appears here and that every listed active skill exists.
 | Writing, editing prose, release notes, bilingual polish | `skills/write/SKILL.md` |
 | Push a local Markdown file to Notion | `skills/notion-md-sync/SKILL.md` |
 | Send a DM message to a Lark app bot as the logged-in user | `skills/lark-send-to-bot/SKILL.md` |
-| Draw dark-themed architecture diagrams as editable Lark whiteboard (画板) nodes | `skills/lark-architecture/SKILL.md` |
+| Draw architecture diagrams as editable Lark whiteboard (画板) nodes | `skills/architecture-to-lark-whiteboard/SKILL.md` |
 
 ### Git Convenience
 

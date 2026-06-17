@@ -10,9 +10,9 @@ Create professional technical architecture diagrams as self-contained HTML files
 > **Version 1.1** · MIT License · Authored by [Cocoon AI](mailto:hello@cocoon-ai.com)
 
 > **Targeting a Lark / 飞书 whiteboard (画板) instead of a local HTML file?** Use the companion
-> [`lark-architecture`](../../lark-architecture/SKILL.md) skill. This skill's output (embedded `<pattern>` grid,
+> [`architecture-to-lark-whiteboard`](../../architecture-to-lark-whiteboard/SKILL.md) skill. This skill's output (embedded `<pattern>` grid,
 > `<filter>` glows, html2canvas export toolbar, `<foreignObject>`) is **not** supported by Lark's whiteboard
-> svg-parser and will render broken. `lark-architecture` reuses this design system (semantic palette, component
+> svg-parser and will render broken. `architecture-to-lark-whiteboard` reuses this design system (semantic palette, component
 > boxes, legend rules) but adapts the SVG to the whiteboard-safe subset and writes editable nodes into Lark docs/boards.
 
 ## Design System
