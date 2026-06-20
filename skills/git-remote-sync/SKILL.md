@@ -13,7 +13,7 @@ Use only when the user explicitly asks to synchronize a git repository with its 
 
 - `git-remote-sync`
 - "commit, pull, and push everything"
-- "sync main repo and submodules"
+- "sync parent repo and submodules"
 - "同步主仓和子仓"
 - "主仓和子仓都 pull/push"
 
@@ -23,6 +23,7 @@ Do not trigger proactively after unrelated edits. This skill performs networked 
 
 - Preserve the user's unrelated work. Never reset, checkout, or discard changes unless explicitly authorized.
 - Treat the parent repo and every submodule as separate git repositories with separate remotes.
+- `.gitmodules` is the source of truth for each tracked submodule branch. A submodule with `branch = main` stays on `main`; a submodule with `branch = dev` stays on `dev`; every workflow step uses that configured branch.
 - For submodules that declare a tracked branch in `.gitmodules`, keep the working tree on that branch before committing, pulling, or pushing.
 - Commit submodule changes before committing the parent repo, then stage and commit the parent submodule pointer update.
 - Push submodule commits before the parent commit so the parent never records an unreachable submodule pointer on the remote.
@@ -41,9 +42,10 @@ git config -f .gitmodules --get-regexp '^submodule\..*\.path$' || true
 git config -f .gitmodules --get-regexp '^submodule\..*\.branch$' || true
 ```
 
-For each submodule path `P` found in `.gitmodules`, inspect:
+For each submodule path `P` found in `.gitmodules`, inspect the configured branch and current checkout:
 
 ```bash
+git config -f .gitmodules --get submodule.P.branch || true
 git -C P status --short --branch
 git -C P remote -v
 git -C P branch --show-current
@@ -189,10 +191,12 @@ git submodule status --recursive
 git submodule foreach --recursive 'git status --short --branch'
 ```
 
-For tracked-branch submodules, confirm each branch remains checked out:
+For tracked-branch submodules, confirm each checkout matches its `.gitmodules` branch:
 
 ```bash
-git -C P branch --show-current
+branch=$(git config -f .gitmodules --get submodule.P.branch)
+current=$(git -C P branch --show-current)
+test "$current" = "$branch"
 ```
 
 Report:
@@ -218,4 +222,4 @@ Report:
 
 **User**: `git-remote-sync`
 
-→ Commit tracked-branch submodule changes, commit parent pointer updates, fetch and pull submodules, fetch and pull parent, resolve conflicts if safe, commit any new parent pointer updates, push submodule branches, then push the parent.
+→ Commit tracked-branch submodule changes, commit parent pointer updates, fetch and pull each submodule on its `.gitmodules` branch, fetch and pull parent, resolve conflicts if safe, commit any new parent pointer updates, push submodule branches, then push the parent.
