@@ -18,3 +18,8 @@
 	url = git@github.com:hylarucoder/hai-stack.git
 	branch = main
 	update = merge
+[submodule "refs/ponytail"]
+	path = refs/ponytail
+	url = git@github.com:DietrichGebert/ponytail.git
+	branch = main
+	update = merge
