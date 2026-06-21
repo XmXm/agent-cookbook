@@ -3,4 +3,4 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-git submodule update --remote
+git submodule update --remote --merge
