@@ -135,7 +135,7 @@ for path in skill_files:
         if root.is_dir():
             md_files.extend(sorted(root.rglob("*.md")))
 
-link_re = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
+link_re = re.compile(r"(?<!!)\[[^\]]*\]\(([^)]+)\)")
 url_prefixes = ("http://", "https://", "mailto:", "ftp://", "tel:", "data:")
 for path in md_files:
     # Lark skills are vendored upstream; their references contain doc placeholders
