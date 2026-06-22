@@ -28,7 +28,7 @@ compatibility: |
 >    - **唯一兜底**：极少数情况 `docs +update --doc <wiki-url>` 报 "doc not found" 时，才 `lark-cli docs +fetch --api-version v2 --doc <wiki-url>` 取 `data.document.document_id`（不是 `obj_token`，v2 fetch 经常返回 null），再用 document_id 重试 `+update`。**不要预防性 fetch**，遇到错才用。
 > 7. 已写过内容的画板二次写入前必须 `--overwrite --dry-run` 探测，看到 `XX whiteboard nodes will be deleted` 先向用户确认。
 > 8. `--idempotent-token` ≥10 字符，格式 `<unix>-<basename>-<idx>`，避免重试导致重复写入。
-> 9. **本 skill 不处理本地图片自动上传** —— `![](./local.png)` 这种死链会留在文档中。需要本地图片时请提示用户用 `docs +media-insert` 手工补，或预先把图传到图床改成 https URL。
+> 9. **本 skill 不处理本地图片自动上传** —— `!\[图注\]\(./local.png\)` 这种死链会留在文档中。需要本地图片时请提示用户用 `docs +media-insert` 手工补，或预先把图传到图床改成 https URL。
 
 ---
 
@@ -246,7 +246,7 @@ print(f'whiteboards={wbs}, text_chars={len(text)}, title={title}')
 
 ## 不在本 skill 范围
 
-- **本地图片自动上传**（`![](./local.png)`）：lark-doc 不会自动找本地文件。如有需要请提示用户：(a) 把图上传图床改成 https，或 (b) 让用户单独跑 `docs +media-insert --file <path>`。
+- **本地图片自动上传**（`!\[alt\]\(./local.png\)`）：lark-doc 不会自动找本地文件。如有需要请提示用户：(a) 把图上传图床改成 https，或 (b) 让用户单独跑 `docs +media-insert --file <path>`。
 - **PlantUML / 复杂 DSL 画板**：需要走 `lark-whiteboard` skill 的 svg / dsl 路由，本 skill 仅覆盖 mermaid。
 - **文档内嵌 sheet / bitable**：超出 markdown 表达力，由 `lark-doc` skill 主流程处理。
 
