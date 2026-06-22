@@ -1,29 +1,6 @@
-# Common Security Guidelines
+# Common Security
 
-## Mandatory Security Checks
-
-Before ANY commit:
-- [ ] No hardcoded secrets (API keys, passwords, tokens)
-- [ ] All user inputs validated
-- [ ] SQL injection prevention (parameterized queries)
-- [ ] XSS prevention (sanitized HTML)
-- [ ] CSRF protection enabled
-- [ ] Authentication/authorization verified
-- [ ] Rate limiting on all endpoints
-- [ ] Error messages don't leak sensitive data
-
-## Secret Management
-
-- NEVER hardcode secrets in source code
-- ALWAYS use environment variables or a secret manager
-- Validate that required secrets are present at startup
-- Rotate any secrets that may have been exposed
-
-## Security Response Protocol
-
-If security issue found:
-1. STOP immediately
-2. Use **security-reviewer** agent
-3. Fix CRITICAL issues before continuing
-4. Rotate any exposed secrets
-5. Review entire codebase for similar issues
+- Never hardcode secrets (API keys, passwords, tokens). Use environment variables or a secret manager, validate they exist at startup, and rotate anything that may have leaked.
+- Don't trust external data (user input, API responses, file content) — validate it at system boundaries.
+- Prevent injection: parameterized queries for SQL, escape/sanitize for XSS. Apply auth/authorization based on the sensitivity of each surface.
+- Error messages must not leak sensitive data.

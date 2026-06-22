@@ -7,59 +7,8 @@ paths:
 ---
 # TypeScript/JavaScript Coding Style
 
-> This file extends [common-coding-style.md](./common-coding-style.md) with TypeScript/JavaScript specific content.
+> Extends [common-coding-style.md](./common-coding-style.md).
 
-## Immutability
-
-Use spread operator for immutable updates:
-
-```typescript
-// WRONG: Mutation
-function updateUser(user, name) {
-  user.name = name  // MUTATION!
-  return user
-}
-
-// CORRECT: Immutability
-function updateUser(user, name) {
-  return {
-    ...user,
-    name
-  }
-}
-```
-
-## Error Handling
-
-Use async/await with try-catch:
-
-```typescript
-try {
-  const result = await riskyOperation()
-  return result
-} catch (error) {
-  console.error('Operation failed:', error)
-  throw new Error('Detailed user-friendly message')
-}
-```
-
-## Input Validation
-
-Use Zod for schema-based validation:
-
-```typescript
-import { z } from 'zod'
-
-const schema = z.object({
-  email: z.string().email(),
-  age: z.number().int().min(0).max(150)
-})
-
-const validated = schema.parse(input)
-```
-
-## Console.log
-
-- No `console.log` statements in production code
-- Use proper logging libraries instead
-- See hooks for automatic detection
+- Immutable updates via the spread operator (`{ ...user, name }`), not in-place mutation.
+- Validate external input at boundaries with a schema library (e.g. Zod).
+- No `console.log` in production code — use a proper logging library.

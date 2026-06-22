@@ -1,29 +1,7 @@
-# Common Testing Requirements
+# Common Testing
 
-## Minimum Test Coverage: 80%
-
-Test Types (ALL required):
-1. **Unit Tests** - Individual functions, utilities, components
-2. **Integration Tests** - API endpoints, database operations
-3. **E2E Tests** - Critical user flows (framework chosen per language)
-
-## Test-Driven Development
-
-MANDATORY workflow:
-1. Write test first (RED)
-2. Run test - it should FAIL
-3. Write minimal implementation (GREEN)
-4. Run test - it should PASS
-5. Refactor (IMPROVE)
-6. Verify coverage (80%+)
-
-## Troubleshooting Test Failures
-
-1. Use **tdd-guide** agent
-2. Check test isolation
-3. Verify mocks are correct
-4. Fix implementation, not tests (unless tests are wrong)
-
-## Agent Support
-
-- **tdd-guide** - Use PROACTIVELY for new features, enforces write-tests-first
+- Scale test effort to risk: prioritize core logic, regression-prone areas, and any bug you just fixed. Don't force tests on throwaway scripts or obvious code.
+- Pick test types as needed (unit / integration / E2E) — not every change needs the full set.
+- Coverage serves confidence, not a fixed percentage gate.
+- For complex or error-prone logic, writing the test first (TDD) is encouraged, not mandatory.
+- When a test fails, suspect the implementation before changing the test — unless the test itself is wrong.

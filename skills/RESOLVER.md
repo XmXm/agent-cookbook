@@ -11,7 +11,13 @@ appears here and that every listed active skill exists.
 | Trigger | Skill |
 |---|---|
 | Rough idea, architecture choice, value judgment, executable plan | `skills/think/SKILL.md` |
+| Simplest working solution, cut over-engineering, YAGNI, minimal diff | `skills/lazy/SKILL.md` |
 | UI, component, page, visual surface, screenshot taste feedback | `skills/design/SKILL.md` |
+| Scan codebase for architecture deepening opportunities | `skills/improve-codebase-architecture/SKILL.md` |
+| Deep-module design vocabulary: module, interface, depth, seam, adapter | `skills/codebase-design/SKILL.md` |
+| Pin down domain terminology / ubiquitous language, record ADRs | `skills/domain-modeling/SKILL.md` |
+| Relentless one-question-at-a-time interview to stress-test a plan | `skills/grilling/SKILL.md` |
+| Compact the current conversation into a handoff doc for another agent | `skills/handoff/SKILL.md` |
 | File-based planning under `.plans/` | `skills/planning-in/SKILL.md` |
 | Show active `.plans/` work | `skills/planning-in-status/SKILL.md` |
 | Remove stale or completed `.plans/` work | `skills/planning-in-remove/SKILL.md` |
@@ -26,22 +32,46 @@ appears here and that every listed active skill exists.
 | Error, crash, regression, failing test, unexpected behavior | `skills/hunt/SKILL.md` |
 | Diff review, merge readiness, release follow-through, issue or PR triage | `skills/check/SKILL.md` |
 | C# naming and style scan | `skills/cs-style-check/SKILL.md` |
-| Completion claim, fixed claim, passing claim | `skills/verification-before-completion/SKILL.md` |
 
-### Content, Web, And External Systems
+### Content And Web
 
 | Trigger | Skill |
 |---|---|
 | Writing, editing prose, release notes, bilingual polish | `skills/write/SKILL.md` |
 | Push a local Markdown file to Notion | `skills/notion-md-sync/SKILL.md` |
-| Send a DM message to a Lark app bot as the logged-in user | `skills/lark-send-to-bot/SKILL.md` |
-| Draw architecture diagrams as editable Lark whiteboard (画板) nodes | `skills/architecture-to-lark-whiteboard/SKILL.md` |
+| Open/read/summarize a URL, web search, research, clip an article | `skills/webforage/SKILL.md` |
 
-### Git Convenience
+### Lark / Feishu
+
+| Trigger | Skill |
+|---|---|
+| First-time lark-cli setup, auth login, identity switch, scope errors | `skills/lark-shared/SKILL.md` |
+| Resolve a name/email to open_id, or look up a person by open_id | `skills/lark-contact/SKILL.md` |
+| Look up P2P chat history with a specific person | `skills/finding-lark-chat-history/SKILL.md` |
+| Send/reply messages, manage group chats, up/download chat files | `skills/lark-im/SKILL.md` |
+| Real-time event listening/subscribing (NDJSON stream) | `skills/lark-event/SKILL.md` |
+| Read/edit Feishu Docx / Wiki documents | `skills/lark-doc/SKILL.md` |
+| Create/operate Feishu spreadsheets (Sheets) | `skills/lark-sheets/SKILL.md` |
+| Operate Feishu Bitable (多维表格 / Base) | `skills/lark-base/SKILL.md` |
+| Create/edit Feishu slides | `skills/lark-slides/SKILL.md` |
+| Query/edit Feishu whiteboards (画板) | `skills/lark-whiteboard/SKILL.md` |
+| Manage Feishu tasks, lists, and task agents | `skills/lark-task/SKILL.md` |
+| Feishu approvals: query and act on approval tasks | `skills/lark-approval/SKILL.md` |
+| Manage calendar events and meeting rooms | `skills/lark-calendar/SKILL.md` |
+| Search/operate/generate Minutes (妙记) | `skills/lark-minutes/SKILL.md` |
+| View/create/edit/compare Feishu Markdown files | `skills/lark-markdown/SKILL.md` |
+| Import a whole local `.md` into a Feishu doc (mermaid → 画板) | `skills/markdown-to-lark-doc/SKILL.md` |
+| Draw architecture diagrams as editable Lark whiteboard (画板) nodes | `skills/architecture-to-lark-whiteboard/SKILL.md` |
+| Find/call raw Feishu OpenAPI not wrapped by a CLI command | `skills/lark-openapi-explorer/SKILL.md` |
+| Build a custom lark-cli skill | `skills/lark-skill-maker/SKILL.md` |
+
+### Git And Ops
 
 | Trigger | Skill |
 |---|---|
 | Commit all local changes, optionally push | `skills/commitall/SKILL.md` |
+| Sync parent repo and tracked-branch submodules, push safely | `skills/git-remote-sync/SKILL.md` |
+| Manage Docker/Compose on the remote Windows WSL host | `skills/pc-wsl-docker/SKILL.md` |
 
 ## Legacy
 
