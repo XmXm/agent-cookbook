@@ -38,8 +38,8 @@ Ownership:
 A skill is a directory under `skills/` containing `SKILL.md` (plus optional
 `references/`, `agents/`, `scripts/` subdirs). Two kinds coexist:
 
-- **Own skills** — real directories (e.g. `commitall`, `cs-style-check`,
-  `markdown-to-lark-doc`, `planning-*`, `pc-wsl-docker`).
+- **Own skills** — real directories (e.g. `commitall`, `markdown-to-lark-doc`,
+  `planning-*`, `pc-wsl-docker`).
 - **Symlinked skills** — symlinks into a `refs/` submodule, reusing upstream
   skills (e.g. `think`, `hunt`, `check`, `design`, `write` → `refs/Waza`;
   `lark-*` → `refs/lark-skills`; `handoff`, `improve-codebase-architecture` →

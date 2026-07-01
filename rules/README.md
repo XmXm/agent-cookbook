@@ -56,7 +56,6 @@ Kept:
 | `common-coding-style.md` | Soft immutability + small-files leaning (language rules may override). |
 | `common-security.md` | Secret hygiene, untrusted-input validation, injection/XSS guardrails. |
 | `common-testing.md` | Risk-based testing posture (no fixed coverage gate). |
-| `csharp-coding-style.md` | Hungarian field naming + AI-behavior constraints; model can't infer, and it's the `cs-style-check` basis. |
 | `python-coding-style.md` / `python-security.md` / `python-testing.md` | ruff, bandit, pytest+markers. |
 | `go-security.md` / `go-testing.md` | gosec + govulncheck; table-driven/race/cover. |
 | `markdown-mermaid.md` | Mermaid `<br/>` vs `\n` gotcha — one line, model gets it wrong. |
@@ -72,6 +71,7 @@ facts):
 - `typescript-security.md` — only demoed the most basic env-var practice.
 - `common-git-workflow.md` — conventional-commit format a modern model already follows by default.
 - `swift-coding-style.md`, `swift-security.md`, `swift-testing.md`, `swift-patterns.md` — Swift is not in the active stack.
+- `csharp-coding-style.md` — folded into the `cs-coding-style` skill (authoring guide) as its naming/formatting core. The rule form was retired because some agent runtimes don't load `rules/`; a skill is portable. The battle-core `_camelCase`/`m_Type` convention now lives in that skill.
 
 ## Adding a New Rule
 

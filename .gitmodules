@@ -23,3 +23,8 @@
 	url = git@github.com:DietrichGebert/ponytail.git
 	branch = main
 	update = merge
+[submodule "refs/mt-skills"]
+	path = refs/mt-skills
+	url = git@lf.git.oa.mt:brianzuo/mt-skills.git
+	branch = main
+	update = merge

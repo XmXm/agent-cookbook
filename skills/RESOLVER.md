@@ -25,13 +25,19 @@ appears here and that every listed active skill exists.
 | Split large planning documents into task files | `skills/planning-split/SKILL.md` |
 | Multi-agent review of plans or completed plan code | `skills/planning-review/SKILL.md` |
 
+### Coding (C#)
+
+| Trigger | Skill |
+|---|---|
+| Authoring/modifying MLBB battle C# (naming, frame-sync, hot-path GC, object pool, ISHOW, feature flags) — read before writing | `skills/cs-coding-style/SKILL.md` |
+
 ### Debug, Review, And Verification
 
 | Trigger | Skill |
 |---|---|
 | Error, crash, regression, failing test, unexpected behavior | `skills/hunt/SKILL.md` |
 | Diff review, merge readiness, release follow-through, issue or PR triage | `skills/check/SKILL.md` |
-| C# naming and style scan | `skills/cs-style-check/SKILL.md` |
+| Search the battle knowledge base for patterns, cases, config relations, postmortems | `skills/kb-search/SKILL.md` |
 
 ### Content And Web
 
@@ -64,6 +70,8 @@ appears here and that every listed active skill exists.
 | Draw architecture diagrams as editable Lark whiteboard (画板) nodes | `skills/architecture-to-lark-whiteboard/SKILL.md` |
 | Find/call raw Feishu OpenAPI not wrapped by a CLI command | `skills/lark-openapi-explorer/SKILL.md` |
 | Build a custom lark-cli skill | `skills/lark-skill-maker/SKILL.md` |
+| Read/fetch Feishu Project (Meego) bug/story work items | `skills/lark-proj/SKILL.md` |
+| Generate/publish story closeout comments, finish owned nodes | `skills/lark-story-closeout/SKILL.md` |
 
 ### Git And Ops
 
@@ -75,14 +83,15 @@ appears here and that every listed active skill exists.
 
 ## Legacy
 
-These skills are parked under `legacy/` because active Waza skills now
-cover the same workflow:
+These skills are parked under `legacy/` because an active skill or workflow
+now covers the same need:
 
 | Legacy skill | Active replacement |
 |---|---|
 | `legacy/brainstorming/SKILL.md` | `skills/think/SKILL.md` |
 | `legacy/systematic-debugging/SKILL.md` | `skills/hunt/SKILL.md` |
 | `legacy/p4-ops/SKILL.md` | Project-local Perforce workflow |
+| `legacy/cs-style-check/SKILL.md` | `skills/cs-coding-style/SKILL.md` (C# authoring); review via `check` / `p4-review` |
 
 ## Routing Notes
 
