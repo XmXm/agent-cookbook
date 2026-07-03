@@ -94,13 +94,16 @@ for path in skill_files:
         fail(f"BROKEN SYMLINK: {path.parent}")
     print(f"ok: skill {name}")
 
-if (SKILLS_DIR / "brainstorming").exists():
-    fail("LEGACY MOVE INCOMPLETE: skills/brainstorming still exists")
-if (SKILLS_DIR / "systematic-debugging").exists():
-    fail("LEGACY MOVE INCOMPLETE: skills/systematic-debugging still exists")
-for legacy in ("brainstorming", "systematic-debugging"):
-    if not (LEGACY_DIR / legacy / "SKILL.md").exists():
-        fail(f"LEGACY SKILL MISSING: legacy/{legacy}/SKILL.md")
+MUST_BE_RETIRED = (
+    "brainstorming", "systematic-debugging",
+    "planning-in", "planning-in-remove", "planning-in-status",
+    "planning-organize", "planning-review", "planning-split",
+)
+for retired in MUST_BE_RETIRED:
+    if (SKILLS_DIR / retired).exists():
+        fail(f"LEGACY MOVE INCOMPLETE: skills/{retired} still exists")
+    if not (LEGACY_DIR / retired / "SKILL.md").exists():
+        fail(f"LEGACY SKILL MISSING: legacy/{retired}/SKILL.md")
 print("ok: legacy parking")
 
 if not RESOLVER.exists():

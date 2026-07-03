@@ -6,44 +6,44 @@ appears here and that every listed active skill exists.
 
 ## Active Routing
 
-### Planning And Design
+### Front Doors
+
+Four self-contained work entry points (plan → check → hunt → write-document).
+Each covers one phase of a task; they do not chain automatically.
 
 | Trigger | Skill |
 |---|---|
-| Rough idea, architecture choice, value judgment, executable plan | `skills/think/SKILL.md` |
+| Rough idea, architecture, value judgment, refactor plan, plan stress-test, acceptance | `skills/plan/SKILL.md` |
+| Diff review, merge readiness, plan execution ("按计划实施"), release follow-through, project audit | `skills/check/SKILL.md` |
+| Error, crash, regression, failing test, broken behavior, screenshot-reported defect | `skills/hunt/SKILL.md` |
+| Structured document creation: README, design doc, postmortem, weekly report, KB knowledge, Feishu delivery | `skills/write-document/SKILL.md` |
+
+### Coding Guides
+
+| Trigger | Skill |
+|---|---|
+| Authoring/modifying MLBB battle C# (naming, frame-sync, hot-path GC, object pool, ISHOW, feature flags) — read before writing | `skills/cs-coding/SKILL.md` |
+
+### Design And Style
+
+| Trigger | Skill |
+|---|---|
 | Simplest working solution, cut over-engineering, YAGNI, minimal diff | `skills/lazy/SKILL.md` |
 | UI, component, page, visual surface, screenshot taste feedback | `skills/design/SKILL.md` |
-| Scan codebase for architecture deepening opportunities | `skills/improve-codebase-architecture/SKILL.md` |
-| Deep-module design vocabulary: module, interface, depth, seam, adapter | `skills/codebase-design/SKILL.md` |
-| Pin down domain terminology / ubiquitous language, record ADRs | `skills/domain-modeling/SKILL.md` |
-| Relentless one-question-at-a-time interview to stress-test a plan | `skills/grilling/SKILL.md` |
-| Compact the current conversation into a handoff doc for another agent | `skills/handoff/SKILL.md` |
-| File-based planning under `.plans/` | `skills/planning-in/SKILL.md` |
-| Show active `.plans/` work | `skills/planning-in-status/SKILL.md` |
-| Remove stale or completed `.plans/` work | `skills/planning-in-remove/SKILL.md` |
-| Reorganize planning documents for structure | `skills/planning-organize/SKILL.md` |
-| Split large planning documents into task files | `skills/planning-split/SKILL.md` |
-| Multi-agent review of plans or completed plan code | `skills/planning-review/SKILL.md` |
 
-### Coding (C#)
+### Knowledge
 
 | Trigger | Skill |
 |---|---|
-| Authoring/modifying MLBB battle C# (naming, frame-sync, hot-path GC, object pool, ISHOW, feature flags) — read before writing | `skills/cs-coding-style/SKILL.md` |
-
-### Debug, Review, And Verification
-
-| Trigger | Skill |
-|---|---|
-| Error, crash, regression, failing test, unexpected behavior | `skills/hunt/SKILL.md` |
-| Diff review, merge readiness, release follow-through, issue or PR triage | `skills/check/SKILL.md` |
 | Search the battle knowledge base for patterns, cases, config relations, postmortems | `skills/kb-search/SKILL.md` |
+| Compress the current session into a handoff doc for a fresh session (session-level; task-level tracking lives in plan's `.plans/`) | `skills/handoff/SKILL.md` |
+| Monthly skill usage observation: transcript stats, miss/misfire sampling, nmem monthly report writeback | `skills/skill-usage-report/SKILL.md` |
 
 ### Content And Web
 
 | Trigger | Skill |
 |---|---|
-| Writing, editing prose, release notes, bilingual polish | `skills/write/SKILL.md` |
+| Writing, editing prose, release notes, bilingual polish, remove AI tone | `skills/write/SKILL.md` |
 | Push a local Markdown file to Notion | `skills/notion-md-sync/SKILL.md` |
 | Open/read/summarize a URL, web search, research, clip an article | `skills/webforage/SKILL.md` |
 
@@ -77,6 +77,7 @@ appears here and that every listed active skill exists.
 
 | Trigger | Skill |
 |---|---|
+| Open or summarize diffs in Beyond Compare from Git, P4, SVN, unified diff text, or explicit left/right paths | `skills/bcompare-diff/SKILL.md` |
 | Commit all local changes, optionally push | `skills/commitall/SKILL.md` |
 | Sync parent repo and tracked-branch submodules, push safely | `skills/git-remote-sync/SKILL.md` |
 | Manage Docker/Compose on the remote Windows WSL host | `skills/pc-wsl-docker/SKILL.md` |
@@ -88,10 +89,17 @@ now covers the same need:
 
 | Legacy skill | Active replacement |
 |---|---|
-| `legacy/brainstorming/SKILL.md` | `skills/think/SKILL.md` |
+| `legacy/brainstorming/SKILL.md` | `skills/plan/SKILL.md` (Design mode) |
 | `legacy/systematic-debugging/SKILL.md` | `skills/hunt/SKILL.md` |
 | `legacy/p4-ops/SKILL.md` | Project-local Perforce workflow |
-| `legacy/cs-style-check/SKILL.md` | `skills/cs-coding-style/SKILL.md` (C# authoring); review via `check` / `p4-review` |
+| `legacy/cs-style-check/SKILL.md` | `skills/cs-coding/SKILL.md` (C# authoring); review via `check` / `p4-review` |
+| `legacy/planning-in/SKILL.md` | `skills/plan/SKILL.md` (Persist the Plan) |
+| `legacy/planning-in-remove/SKILL.md` | `skills/plan/SKILL.md` |
+| `legacy/planning-in-status/SKILL.md` | `skills/plan/SKILL.md` |
+| `legacy/planning-organize/SKILL.md` | `skills/plan/SKILL.md` |
+| `legacy/planning-review/SKILL.md` | `skills/plan/SKILL.md` (Grill / Review modes) |
+| `legacy/planning-split/SKILL.md` | `skills/plan/SKILL.md` |
+| `refs/Waza/skills/think` (upstream, unlinked) | `skills/plan/SKILL.md` (think skeleton internalized; Lightweight/Triage/attack angles ported) |
 
 ## Routing Notes
 
@@ -99,3 +107,5 @@ now covers the same need:
 - When several skills match, choose the most specific workflow.
 - For completed implementation work, use `check`; for broken behavior, use `hunt`.
 - For UI taste and composition work, use `design`; for UI regressions, use `hunt`.
+- `write-document` creates structured documents; `write` polishes/rewrites prose and removes AI tone. They do not overlap.
+- `plan` produces the plan; `check` Plan Execution mode implements it. `plan` does not write code.
