@@ -1,8 +1,8 @@
 # Project Review Context Template
 
-Use this template to compress repository context before running Waza `/check`. The context must come from public project files, the diff, CI configuration, or explicit user instructions. Do not depend on private machine paths or unpublished project instructions.
+Use this template to compress repository context before running `/check`. The context must come from public project files, the diff, CI configuration, or explicit user instructions. Do not depend on private machine paths or unpublished project instructions.
 
-## What Belongs In Waza `/check`
+## What Belongs In `/check`
 
 - Diff depth classification.
 - Scope drift detection.
@@ -40,7 +40,7 @@ Use this template to compress repository context before running Waza `/check`. T
 - One-off personal preferences that do not affect project behavior.
 - One-off review reports, scorecards, or diagnostic snapshots copied as guidance instead of distilled into stable project rules.
 - Raw memory, chat excerpts, screenshots, private support details, local paths, project-specific commands, issue/PR numbers, release tags, or commit hashes from another project.
-- Full copies of Waza `/check` sections.
+- Full copies of `/check` sections.
 
 ## Recommended Context Shape
 
@@ -83,7 +83,11 @@ Use this template to compress repository context before running Waza `/check`. T
 
 ## Public Replies
 
-See `public-reply.md` for the full reply template (language match, `@user` + thanks, factual paragraphs, ship-state line, closure criteria). It is the single source; do not restate the rules here.
+- Match the reporter's language; thank once, no more. 1-2 short factual
+  paragraphs: what changed and the verification evidence, no hype.
+- Name the ship state explicitly (merged / released in vX / pending release).
+- Close only when the fix is verified against the reporter's scenario;
+  otherwise state what evidence is still missing.
 
 ## Release Follow-through
 

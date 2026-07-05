@@ -102,6 +102,18 @@ def is_excluded(path: Path, root: Path) -> bool:
 
 
 def iter_files(root: Path) -> list[Path]:
+    rroot = root.resolve()
+
+    def in_tree(p: Path) -> bool:
+        # A committed symlink to /etc or a parent dir must not leak
+        # out-of-tree content into the signals.
+        if not p.is_symlink():
+            return True
+        try:
+            return p.resolve().is_relative_to(rroot)
+        except OSError:
+            return False
+
     try:
         # The target repo is untrusted: its .git/config must not execute
         # commands during ls-files (core.fsmonitor is a command hook).
@@ -118,7 +130,7 @@ def iter_files(root: Path) -> list[Path]:
             out = []
             for line in proc.stdout.splitlines():
                 p = root / line
-                if p.is_file() and not is_excluded(p, root):
+                if p.is_file() and in_tree(p) and not is_excluded(p, root):
                     out.append(p)
             return out
     except OSError:
@@ -131,7 +143,7 @@ def iter_files(root: Path) -> list[Path]:
             continue
         for fname in filenames:
             p = current / fname
-            if p.is_file() and not is_excluded(p, root):
+            if p.is_file() and in_tree(p) and not is_excluded(p, root):
                 out.append(p)
     return out
 
@@ -189,7 +201,7 @@ def block_heredoc(files: list[Path], root: Path) -> None:
     for path in files:
         if path.suffix not in {".sh", ".bash", ".zsh"}:
             continue
-        text = read_text(path)
+        text = read_text(path, 200_000)
         if not text:
             continue
         lines = text.splitlines()
@@ -412,7 +424,7 @@ def block_version_sources(root: Path) -> None:
     found: list[tuple[str, str]] = []
     v = root / "VERSION"
     if v.is_file():
-        first = read_text(v).strip().splitlines()
+        first = read_text(v, 10_000).strip().splitlines()
         if first:
             found.append(("VERSION", first[0]))
     probes = [
@@ -461,7 +473,7 @@ def block_packaging_posture(root: Path) -> None:
                    + list(root.glob("scripts/release*.sh")))
     denylist_hits = 0
     for sp in pkg_scripts:
-        for line in read_text(sp).splitlines():
+        for line in read_text(sp, 200_000).splitlines():
             if DENYLIST_HINT_RE.search(line):
                 denylist_hits += 1
     if allowlist_files:
@@ -530,8 +542,8 @@ def block_agent_doc_dedup(root: Path) -> None:
         print("posture=symlink (AGENTS.md -> CLAUDE.md)")
         status("PASS")
         return
-    a = read_text(claude)
-    b = read_text(agents)
+    a = read_text(claude, 200_000)
+    b = read_text(agents, 200_000)
     if a and a == b:
         print("posture=identical (consider symlink to dedup)")
         status("WARN")
@@ -592,7 +604,7 @@ def block_duplicate_setup(root: Path) -> None:
         return
     sets: dict[Path, set[str]] = {}
     for sp in scripts:
-        sets[sp] = {ln.strip() for ln in read_text(sp).splitlines()
+        sets[sp] = {ln.strip() for ln in read_text(sp, 200_000).splitlines()
                     if ln.strip() and not ln.strip().startswith("#")}
     pairs: list[tuple[str, str, float]] = []
     names = list(sets.keys())

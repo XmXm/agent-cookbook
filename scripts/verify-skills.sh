@@ -66,18 +66,29 @@ def parse_frontmatter(path: Path) -> dict[str, str]:
     return fields
 
 
-def active_skill_files() -> list[Path]:
-    files = []
+def collect_skills() -> tuple[list[Path], set[str]]:
+    files: list[Path] = []
+    unmounted: set[str] = set()
     for child in sorted(SKILLS_DIR.iterdir()):
         if child.name.startswith(".") or child.name == "legacy":
             continue
         skill_file = child / "SKILL.md"
         if skill_file.exists():
             files.append(skill_file)
-    return files
+            continue
+        if child.is_symlink():
+            # mt-skills is access-gated (company git): a dangling link into it
+            # means the project layer is not mounted on this machine, not a
+            # broken contract. Any other dangling symlink is a real defect.
+            if "mt-skills" in child.readlink().parts:
+                unmounted.add(child.name)
+                print(f"warn: unmounted mt-skills skill {child.name}")
+            else:
+                fail(f"BROKEN SYMLINK: {child}")
+    return files, unmounted
 
 
-skill_files = active_skill_files()
+skill_files, unmounted_skills = collect_skills()
 if not skill_files:
     fail("NO ACTIVE SKILLS FOUND")
 
@@ -116,7 +127,7 @@ for name in sorted(skill_names):
     print(f"ok: resolver entry {name}")
 
 referenced = set(re.findall(r"skills/([a-z][a-z0-9_-]*)/SKILL\.md", resolver_text))
-stale = sorted(referenced - skill_names)
+stale = sorted(referenced - skill_names - unmounted_skills)
 if stale:
     fail("RESOLVER REFERENCES MISSING ACTIVE SKILL: " + ", ".join(stale))
 print("ok: resolver active references")
@@ -209,5 +220,8 @@ for path in md_files:
         sep_pipes = None
     print(f"ok: table pipes {path}")
 
-print(f"verified {len(skill_files)} active skills")
+summary = f"verified {len(skill_files)} active skills"
+if unmounted_skills:
+    summary += f" ({len(unmounted_skills)} mt-skills skills unmounted)"
+print(summary)
 PYEOF

@@ -60,6 +60,11 @@ symptom. At each signal, find one more independent piece of evidence.
 Hypothesis quality gate: list all observable symptoms. The hypothesis must
 explain every symptom; if it only covers some, it is a symptom-level guess.
 
+For recurring failure classes (stale caches, generated-artifact boundaries,
+path/cwd/symlink escapes, TTY/subprocess hangs), load
+`references/failure-patterns.md` before forming the next hypothesis — and
+always before adding a second fix for the same symptom.
+
 ## Bisect Mode
 
 Activate when: "以前是好的", "used to work", "broke after update".

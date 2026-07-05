@@ -82,7 +82,9 @@ Activate when the user's message starts with "Implement the following plan",
 2. Check for repo drift: `git status --short --branch` and skim changed files that contradict the plan. If drift makes the plan unsafe, name the conflict and stop.
 3. Work through each plan item as a to-do. Mark each complete as you go.
 4. If the plan lives in a `.plans/<NNN>-*/` directory, update `progress.md` as phases complete (if present; create it only when execution spans sessions or is long-running), per the `shared/plan-artifacts.md` contract — rolling summaries, completed phases fold into one line.
-5. After all items are done, run the project's verification command.
+5. After all items are done, run the project's verification command. If the
+   project documents none, run `bash <skill-base-dir>/scripts/run-tests.sh`
+   from the project root — it auto-detects the test command.
 6. Transition into Ship mode if the context indicates review-then-ship.
 
 ## Get the Diff
@@ -153,7 +155,8 @@ by severity.
 
 Activate when the user asks to commit, tag, release, publish, or push.
 
-1. Extract release rules from project context.
+1. Extract release rules per `references/project-context.md` (context shape,
+   Release Gate 2.0 matrix, Safety Sink review).
 2. Verify generated outputs, version fields, and required artifacts are in sync.
 3. Commit only intended files. Preserve unrelated dirty work.
 4. Push, publish, tag, or release only with explicit user approval.
