@@ -109,6 +109,7 @@ MUST_BE_RETIRED = (
     "brainstorming", "systematic-debugging",
     "planning-in", "planning-in-remove", "planning-in-status",
     "planning-organize", "planning-review", "planning-split",
+    "commitall", "git-remote-sync",
 )
 for retired in MUST_BE_RETIRED:
     if (SKILLS_DIR / retired).exists():
