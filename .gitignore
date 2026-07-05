@@ -1,2 +1,4 @@
 .DS_Store
 /diagrams/
+__pycache__/
+*.pyc
