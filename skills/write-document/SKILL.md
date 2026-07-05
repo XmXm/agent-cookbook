@@ -57,6 +57,8 @@ so and proceed.
 Structure: 概述 → 画板 (optional) → 主要进展 → 后续安排.
 
 - 动词开头写"做了什么" — e.g. "完成了 X 的联调", "修复了 Y 的同步问题".
+- 主要进展只写已发生的事，用完成时；计划和将来时（"将会/准备/计划"）
+  一律归入后续安排.
 - 不搞一二三分节 — use natural grouping by topic.
 - Keep each progress item to 1-2 sentences.
 
@@ -91,16 +93,26 @@ regular design doc in local markdown.
 - Cross-section repetition: if the same fact appears in two sections, keep it
   in one and reference it from the other.
 - Tables do not re-read: do not repeat table data in surrounding prose.
+- No vague referents: replace "几个方向 / 一些问题 / 这些东西" with a counted,
+  exact category noun — "三类风险", "两个待决项", "六类用途".
 - Before deleting a section, confirm the information is captured elsewhere.
 
 ## Prose Quality Floor
 
-When `/write` is unavailable (e.g. on a work machine without Waza), apply these
-three minimum constraints:
+<!-- Items 4-5 and the no-vague-referents rule distilled from
+     Pluviobyte/rnskill (renhua), MIT-spirit idea reuse, no dependency. -->
+
+A mechanical self-scan before delivering any document — zero-judgment checks,
+applied to this skill's own output by default, and the full floor when
+`/write` is unavailable (e.g. on a work machine without Waza):
 
 1. No em-dash (`—`) — use a comma, period, or parenthetical.
 2. Chinese-English boundary: add a space between CJK and Latin characters.
 3. Deliver only a finished draft — no "here's a starting point" hedging.
+4. Scan for high-frequency AI shells; if found, rewrite the sentence to state
+   the claim directly: "不是…而是", "真正 / 本质上", "更重要的是".
+5. Verb tense matches work state: completed work in completed form
+   ("测了 / 修复了"), future tense only for real next steps.
 
 For deeper polish, route to `/write`.
 
