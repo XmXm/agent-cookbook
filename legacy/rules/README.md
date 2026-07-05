@@ -1,6 +1,6 @@
 # Rules (Retired)
 
-> **Retired 2026-07-02.** Content folded into `mt-skills/shared/` and skill
+> **Retired 2026-07-02.** Content folded into `shared/` and skill
 > references. The `~/.claude/rules` symlink has been removed; rules are no
 > longer loaded by the agent runtime. Files are preserved here for reference.
 >
@@ -8,9 +8,9 @@
 >
 > | Rule file | New location |
 > |---|---|
-> | common-coding-style, common-security, common-testing | `mt-skills/shared/common-core.md` |
-> | python-\*, go-\* | `mt-skills/shared/languages.md` |
-> | markdown-mermaid | `mt-skills/skills/write-document/SKILL.md` (inline) |
+> | common-coding-style, common-security, common-testing | `shared/common-core.md` |
+> | python-\*, go-\* | `shared/languages.md` |
+> | markdown-mermaid | `skills/write-document/SKILL.md` (inline) |
 > | csharp-coding-style | `mt-skills/skills/cs-coding/SKILL.md` (folded earlier) |
 > | typescript-\* | No active consumer — archived as-is |
 

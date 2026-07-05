@@ -19,31 +19,45 @@ no deploy — the symlink makes changes live immediately.
 
 ```text
 agent-cookbook/
-├── skills/           # ACTIVE skills (own dirs + symlinks into refs/ or mt-skills/)
+├── skills/           # ACTIVE skills (own dirs incl. the four doors + symlinks into refs/ or mt-skills/)
 │   └── RESOLVER.md   # human routing table; every active skill must be listed here
-├── mt-skills/        # user's own shared skill submodule (editable; not third-party)
-│   ├── skills/       # four front doors + cs-coding + kb-search + lark-proj + lark-story-closeout + bcompare-diff
-│   └── shared/       # cross-skill base conventions (common-core, languages, knowledge-preflight, etc.)
+├── shared/           # universal cross-skill contracts (common-core, languages,
+│                     #   knowledge-preflight, agent-constraints, plan-artifacts)
+│                     #   + project-routing.md mount (symlink into mt-skills)
+├── METHODOLOGY.md    # 门·证·环·剃 — the personal methodology, lives with the person
+├── candidates/       # skill drafts pending the promotion gate (eval → skills/ + RESOLVER)
+├── mt-skills/        # MT-ONLY skill layer (submodule on company git)
+│   ├── skills/       # cs-coding + kb-search + lark-proj + lark-story-closeout + bcompare-diff
+│   └── shared/       # project-routing.md (binds doors to MT skills) + workspace-facts.md
 ├── refs/             # third-party repos as git submodules (read-only references)
 ├── scripts/          # verify-skills.sh (contract checker), update-submodules.sh
 └── legacy/           # parked skills and retired rules
     └── rules/        # retired always-on rule files (content folded into shared/ and skills)
 ```
 
-Ownership:
+Ownership and the layer rule:
 
-- `skills/`, `scripts/`, `legacy/` — the user's own / reused content. Edit freely.
-- `mt-skills/` — the user's own shared skills, tracked as a submodule so they can
-  be reused elsewhere. Edit here when changing those skills, then commit and push
-  inside `mt-skills/` before committing the parent repo pointer.
+- The split between this repo and `mt-skills/` is a **distribution boundary**,
+  not an abstraction layer: this repo syncs through personal GitHub, mt-skills
+  through the company git. Universal methodology (doors, shared contracts,
+  METHODOLOGY.md) lives here; MT-specific content lives in mt-skills.
+- **Red lines**: personal engineering practice never goes into `mt-skills/`;
+  anything added to mt-skills must pass "is this MT-consumable work content?".
+  Dependency direction is one-way — mt-skills may reference the universal
+  layer, the universal layer never names anything MT-specific (doors reach MT
+  skills only through the `shared/project-routing.md` mount).
+- `skills/`, `shared/`, `scripts/`, `legacy/` — the user's own / reused
+  content. Edit freely.
+- `mt-skills/` — MT-only submodule. Edit here when changing MT skills, then
+  commit and push inside `mt-skills/` before committing the parent repo pointer.
 - `refs/` — **third-party submodules**. Do not hand-edit; they are upstream code
   pulled in for reference and for symlink targets. Treat `refs/` as read-only;
   only update it by moving submodule pointers via the script below.
 
 ## Front Doors
 
-Four self-contained work entry points plus a coding guide, all in
-`mt-skills/skills/` and symlinked into `skills/`:
+Four self-contained work entry points (real directories in `skills/`) plus a
+coding guide (symlinked from `mt-skills/`):
 
 | Door | What it does |
 |---|---|
@@ -53,14 +67,16 @@ Four self-contained work entry points plus a coding guide, all in
 | `write-document` | Structured document creation (README, design doc, postmortem, weekly report, KB knowledge, Feishu delivery). |
 | `cs-coding` | C# authoring guide for MLBB battle core — read before writing. |
 
-Each door embeds a knowledge preflight (nmem + KB via `/kb-search`) and project
-routing (to battle-debug, p4-review, etc.) at fixed nodes. The shared base
-conventions live in `mt-skills/shared/` and are referenced via per-skill
+Each door embeds a knowledge preflight (nmem + project KB) and project routing
+at fixed nodes. Both reach project specifics only through the
+`shared/project-routing.md` mount (a symlink into `mt-skills/shared/`); when
+the mount is absent the doors degrade gracefully. The universal base
+conventions live in this repo's `shared/` and are referenced via per-skill
 `shared -> ../../shared` symlinks.
 
 ## Methodology & Maintenance
 
-Full methodology: `mt-skills/METHODOLOGY.md` (门·证·环·剃). Condensed:
+Full methodology: `METHODOLOGY.md` (门·证·环·剃). Condensed:
 
 - **门 (Doors)** — entry points cut by task lifecycle: `plan` before code,
   `cs-coding` while writing, `check` after, `hunt` when broken,
@@ -85,7 +101,7 @@ Maintenance cadence:
 | mt-skills change | Commit/push submodule first, then parent pointer (see Submodules) |
 | `update-submodules.sh` run | Skim upstream deltas (esp. Waza); distill worthwhile ideas into own skills, do not re-link |
 | Monthly | Run `/skill-usage-report`: stats vs baseline, miss/misfire sampling, monthly report into nmem |
-| Pillar-level decision lands | Sync `mt-skills/METHODOLOGY.md` — decision-driven, never calendar-driven |
+| Pillar-level decision lands | Sync `METHODOLOGY.md` — decision-driven, never calendar-driven |
 | New skill proposed | Deletion test + Codex 2% context budget check first |
 
 ## Skills
@@ -93,12 +109,12 @@ Maintenance cadence:
 A skill is a directory under `skills/` containing `SKILL.md` (plus optional
 `references/`, `agents/`, `scripts/` subdirs). Two kinds coexist:
 
-- **Own skills** — real directories (e.g. `commitall`, `markdown-to-lark-doc`,
-  `pc-wsl-docker`).
-- **Symlinked skills** — symlinks into `mt-skills/` for the user's shared skills
-  (front doors, cs-coding, kb-search, lark-proj, lark-story-closeout,
-  bcompare-diff), or into `refs/` submodules for upstream skills (`design`,
-  `write` → `refs/Waza`; `lark-*` → `refs/lark-skills`).
+- **Own skills** — real directories (the four front doors, `commitall`,
+  `markdown-to-lark-doc`, `nmem-save`, `pc-wsl-docker`, …).
+- **Symlinked skills** — symlinks into `mt-skills/` for MT skills (cs-coding,
+  kb-search, lark-proj, lark-story-closeout, bcompare-diff), or into `refs/`
+  submodules for upstream skills (`ui`, `write` → `refs/Waza`; `lark-*` →
+  `refs/lark-skills`).
 
 ### SKILL.md contract (enforced by `scripts/verify-skills.sh`)
 
@@ -121,15 +137,16 @@ A skill is a directory under `skills/` containing `SKILL.md` (plus optional
 ## Rules (Retired)
 
 `rules/` has been moved to `legacy/rules/`. Its content was folded into
-`mt-skills/shared/` (common-core, languages) and individual skill references
+`shared/` (common-core, languages) and individual skill references
 (cs-coding, write-document). The `~/.claude/rules` symlink has been removed.
 See `legacy/rules/README.md` for the full mapping.
 
 ## Submodules
 
-`mt-skills/` is a user-owned submodule, not a third-party reference. It may be
-edited directly. When it changes, commit and push `mt-skills/` first, then commit
-the parent repo's submodule pointer update.
+`mt-skills/` is a user-owned MT-only submodule (company git), not a
+third-party reference. It may be edited directly, subject to the red lines
+above. When it changes, commit and push `mt-skills/` first, then commit the
+parent repo's submodule pointer update.
 
 ### Third-party submodules (`refs/`)
 

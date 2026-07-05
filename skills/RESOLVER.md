@@ -29,13 +29,14 @@ Each covers one phase of a task; they do not chain automatically.
 | Trigger | Skill |
 |---|---|
 | Simplest working solution, cut over-engineering, YAGNI, minimal diff | `skills/lazy/SKILL.md` |
-| UI, component, page, visual surface, screenshot taste feedback | `skills/design/SKILL.md` |
+| UI, component, page, visual surface, screenshot taste feedback | `skills/ui/SKILL.md` |
 
 ### Knowledge
 
 | Trigger | Skill |
 |---|---|
 | Search the battle knowledge base for patterns, cases, config relations, postmortems | `skills/kb-search/SKILL.md` |
+| Saving memories to nmem (m add / 写回 nmem / 记到记忆 / remember this): search-first dedupe, update/supersede/deprecate routing, unit-type and importance grading, no spaces | `skills/nmem-save/SKILL.md` |
 | Compress the current session into a handoff doc for a fresh session (session-level; task-level tracking lives in plan's `.plans/`) | `skills/handoff/SKILL.md` |
 | Monthly skill usage observation: transcript stats, miss/misfire sampling, nmem monthly report writeback | `skills/skill-usage-report/SKILL.md` |
 
@@ -106,6 +107,6 @@ now covers the same need:
 - Read the matched skill before acting.
 - When several skills match, choose the most specific workflow.
 - For completed implementation work, use `check`; for broken behavior, use `hunt`.
-- For UI taste and composition work, use `design`; for UI regressions, use `hunt`.
+- For UI taste and composition work, use `ui`; for UI regressions, use `hunt`.
 - `write-document` creates structured documents; `write` polishes/rewrites prose and removes AI tone. They do not overlap.
 - `plan` produces the plan; `check` Plan Execution mode implements it. `plan` does not write code.
