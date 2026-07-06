@@ -24,12 +24,18 @@ Each covers one phase of a task; they do not chain automatically.
 |---|---|
 | Authoring/modifying MLBB battle C# (naming, frame-sync, hot-path GC, object pool, ISHOW, feature flags) — read before writing | `skills/cs-coding/SKILL.md` |
 
+### Delegation
+
+| Trigger | Skill |
+|---|---|
+| User explicitly invokes `/delegate` only (never auto-routed): ROI-gated dispatch to external coding agents (codex / kimi / pi / copilot), concurrent multi-instance capable; Claude plans + routes + accepts | `skills/delegate/SKILL.md` |
+
 ### Design And Style
 
 | Trigger | Skill |
 |---|---|
 | Simplest working solution, cut over-engineering, YAGNI, minimal diff | `skills/lazy/SKILL.md` |
-| UI, component, page, visual surface, screenshot taste feedback | `skills/ui/SKILL.md` |
+| UI, component, page, visual surface, screenshot taste feedback | `skills/design/SKILL.md` |
 
 ### Knowledge
 
@@ -108,6 +114,6 @@ now covers the same need:
 - Read the matched skill before acting.
 - When several skills match, choose the most specific workflow.
 - For completed implementation work, use `check`; for broken behavior, use `hunt`.
-- For UI taste and composition work, use `ui`; for UI regressions, use `hunt`.
+- For UI taste and composition work, use `design` (upstream Waza renamed `ui` → `design`); for UI regressions, use `hunt`.
 - `write-document` creates structured documents; `write` polishes/rewrites prose and removes AI tone. They do not overlap.
 - `plan` produces the plan; `check` Plan Execution mode implements it. `plan` does not write code.
