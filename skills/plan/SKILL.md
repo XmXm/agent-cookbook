@@ -84,9 +84,10 @@ same contract; Review mode reads it back for acceptance.
 
 Before drafting a Design or Refactor recommendation, run the preflight defined
 in `shared/knowledge-preflight.md`: search nmem for prior decisions on the
-topic, and search the project KB (per `shared/project-routing.md`, if mounted)
-for relevant patterns or anti-patterns in the affected subsystem. If either
-source is unavailable, state so and proceed — preflight is non-blocking.
+topic, and search the project KB (per `shared/project-routing.md`, if mounted
+and the current work is within its declared Scope) for relevant patterns or
+anti-patterns in the affected subsystem. If either source is unavailable or
+out of scope, state so and proceed — preflight is non-blocking.
 
 ## Hard Rules
 

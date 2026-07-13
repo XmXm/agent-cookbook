@@ -27,9 +27,10 @@ Done means verification ran in this session and passed.
 ## Knowledge Preflight
 
 Before opening a review, run the preflight defined in `shared/knowledge-preflight.md`:
-search the project KB (per `shared/project-routing.md`, if mounted) for known
-anti-patterns and gotchas related to the subsystem being reviewed; search nmem
-for prior review decisions. If either source is unavailable, state so and
+search the project KB (per `shared/project-routing.md`, if mounted and the
+current work is within its declared Scope) for known anti-patterns and gotchas
+related to the subsystem being reviewed; search nmem for prior review
+decisions. If either source is unavailable or out of scope, state so and
 proceed — preflight is non-blocking.
 
 ## Diff Source Routing

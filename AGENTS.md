@@ -21,6 +21,8 @@ no deploy — the symlink makes changes live immediately.
 agent-cookbook/
 ├── skills/           # ACTIVE skills (own dirs incl. the four doors + symlinks into refs/ or mt-skills/)
 │   └── RESOLVER.md   # human routing table; every active skill must be listed here
+├── .claude/skills/   # PROJECT-level skills (apply only inside this repo, e.g. git-sync;
+│                     #   NOT distributed via ~/.agents; mirrored at .agents/skills symlink)
 ├── shared/           # universal cross-skill contracts (common-core, languages,
 │                     #   knowledge-preflight, agent-constraints, plan-artifacts)
 │                     #   + project-routing.md mount (symlink into mt-skills)
@@ -109,7 +111,7 @@ Maintenance cadence:
 A skill is a directory under `skills/` containing `SKILL.md` (plus optional
 `references/`, `agents/`, `scripts/` subdirs). Two kinds coexist:
 
-- **Own skills** — real directories (the four front doors, `git-sync`,
+- **Own skills** — real directories (the four front doors,
   `markdown-to-lark-doc`, `nmem-save`, `pc-wsl-docker`, …).
 - **Symlinked skills** — symlinks into `mt-skills/` for MT skills (cs-coding,
   kb-search, lark-proj, lark-story-closeout, bcompare-diff), or into `refs/`

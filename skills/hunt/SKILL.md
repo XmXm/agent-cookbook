@@ -33,15 +33,17 @@ is not testable. Be that specific or you do not have a hypothesis yet.
 
 Before forming hypotheses, run the preflight defined in
 `shared/knowledge-preflight.md`: search nmem for prior debugging decisions;
-search the project KB (per `shared/project-routing.md`, if mounted) for
-symptoms, similar cases, and bug history. If either source is unavailable,
-state so and proceed — preflight is non-blocking.
+search the project KB (per `shared/project-routing.md`, if mounted and the
+current work is within its declared Scope) for symptoms, similar cases, and
+bug history. If either source is unavailable or out of scope, state so and
+proceed — preflight is non-blocking.
 
 ## Project Routing
 
-If a project layer is mounted at `shared/project-routing.md`, check its hunt
-route-instead table: when the problem matches a more specific project skill,
-route there instead of staying in hunt. No routing table → stay in hunt.
+If a project layer is mounted at `shared/project-routing.md` and the current
+work is within its declared Scope, check its hunt route-instead table: when
+the problem matches a more specific project skill, route there instead of
+staying in hunt. No routing table, or out of scope → stay in hunt.
 
 ## Hard Rules
 

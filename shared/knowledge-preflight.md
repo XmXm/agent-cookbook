@@ -10,8 +10,10 @@ that explicitly and proceed.
    `nmem --json m search "<topic keywords>"`
 2. **Project KB** — domain patterns, cases, postmortems: only when a project
    layer is mounted at `shared/project-routing.md`, search the knowledge
-   source it declares, the way it declares it. No routing table → skip this
-   source.
+   source it declares, the way it declares it. The routing file may declare
+   a Scope section; if the current workspace or task falls outside that
+   scope, treat the file as not mounted. No routing table, or out of scope
+   → skip this source.
 
 ## Nodes (when to preflight)
 

@@ -27,8 +27,8 @@ structures; it does not polish prose or remove AI tone — route deep polish to
 
 Before drafting, run the preflight defined in `shared/knowledge-preflight.md`:
 search nmem for document-type conventions and prior examples; search the
-project KB (per `shared/project-routing.md`, if mounted) when the document
-touches its domain. To reference an existing Feishu document, use `/lark-doc`
+project KB (per `shared/project-routing.md`, if mounted and the document falls
+within its declared Scope) when the document touches its domain. To reference an existing Feishu document, use `/lark-doc`
 to read it (WebFetch has no Feishu login). If sources are unavailable, state
 so and proceed.
 
