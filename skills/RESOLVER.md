@@ -35,7 +35,7 @@ Each covers one phase of a task; they do not chain automatically.
 | Trigger | Skill |
 |---|---|
 | Simplest working solution, cut over-engineering, YAGNI, minimal diff | `skills/lazy/SKILL.md` |
-| UI, component, page, visual surface, screenshot taste feedback | `skills/design/SKILL.md` |
+| UI, component, page, visual surface, screenshot taste feedback | `skills/ui/SKILL.md` |
 
 ### Knowledge
 
@@ -115,6 +115,6 @@ now covers the same need:
 - Read the matched skill before acting.
 - When several skills match, choose the most specific workflow.
 - For completed implementation work, use `check`; for broken behavior, use `hunt`.
-- For UI taste and composition work, use `design` (upstream Waza renamed `ui` → `design`); for UI regressions, use `hunt`.
+- For UI taste and composition work, use `ui` (upstream Waza renamed `design` → `ui` at df08298 to stop shadowing Claude Code's built-in `/design`); for UI regressions, use `hunt`.
 - `write-document` creates structured documents; `write` polishes/rewrites prose and removes AI tone. They do not overlap.
 - `plan` produces the plan; `check` Plan Execution mode implements it. `plan` does not write code.

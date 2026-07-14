@@ -55,7 +55,7 @@ For a bundle of 3+ independent items ("看看这几个需求", an issue carrying
 
 For "how should I refactor / restructure this" asks. May: map the current seams, name the target deep module, define the verification that proves behavior is preserved, and the rollback. Must not: start editing code, or restructure without a behavior-preserving check.
 
-A refactor plan changes shape, not behavior. When the blast radius is unclear, run a [references/refactor-scan.md](references/refactor-scan.md) first (Explore walk → deletion test → candidate list). State which seam moves and what stays identical, then hand off via [references/handoff.md](references/handoff.md). Use [references/deep-modules.md](references/deep-modules.md) for the target shape; apply the deletion test before proposing a new seam.
+A refactor plan changes shape, not behavior. When the blast radius is unclear, run a [references/refactor-scan.md](references/refactor-scan.md) first (Explore walk → deletion test → candidate list). When the blast radius spans the codebase (a wide, mechanical change), shape the phases as expand–contract (same reference). State which seam moves and what stays identical, then hand off via [references/handoff.md](references/handoff.md). Use [references/deep-modules.md](references/deep-modules.md) for the target shape; apply the deletion test before proposing a new seam.
 
 ### Grill
 

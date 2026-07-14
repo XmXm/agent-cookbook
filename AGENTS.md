@@ -115,7 +115,7 @@ A skill is a directory under `skills/` containing `SKILL.md` (plus optional
   `markdown-to-lark-doc`, `nmem-save`, `pc-wsl-docker`, …).
 - **Symlinked skills** — symlinks into `mt-skills/` for MT skills (cs-coding,
   kb-search, lark-proj, lark-story-closeout, bcompare-diff), or into `refs/`
-  submodules for upstream skills (`design`, `write` → `refs/Waza`; `lark-*` →
+  submodules for upstream skills (`ui`, `write` → `refs/Waza`; `lark-*` →
   `refs/lark-skills`).
 
 ### SKILL.md contract (enforced by `scripts/verify-skills.sh`)
