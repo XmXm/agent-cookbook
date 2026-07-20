@@ -1,11 +1,12 @@
 ---
 name: check
 description: >-
-  Reviews code diffs, PRs, issue queues, release readiness, commits, pushes, publishing,
+  Reviews code diffs, PRs, issue queues, release readiness, git ship follow-through,
   and project audits. Use when users ask in any language for code review, issue or PR triage,
   release gates, publishing follow-through, or project audits.
-  Not for debugging root causes or prose review.
-when_to_use: "review, 看看代码, 检查一下, 有没有问题, 是否需要优化, 合并前, 继续优化, 优化代码, 看看issue, 看看PR, release, publish, push, 发布, 提交, review my code, check changes, before merge, before release, code review, code-review, audit, project audit, 项目体检, 项目评分, 给项目打分, 深入分析项目代码, 评估项目质量, 代码质量评分, scorecard, linus review, rate this codebase, score this project, 按计划实施, 可以干, 直接改"
+  Not for debugging root causes, prose review, or executing non-git VCS submits
+  (P4/SVN changelists route to explicit-only project skills).
+when_to_use: "review, 看看代码, 合并前, 看看issue, 看看PR, review my code, check changes, before merge, before release, release gate, git 提交前, git commit and push, publish follow-through, code review, code-review, audit, project audit, 项目体检, 项目评分, 给项目打分, 深入分析项目代码, 评估项目质量, 代码质量评分, scorecard, linus review, rate this codebase, score this project, 按计划实施, implement this plan"
 dispatch_intent: "Code review, before merge, release gates, plan execution, project-wide audit"
 ---
 
