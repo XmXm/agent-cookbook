@@ -1,13 +1,15 @@
 ---
 name: check
 description: >-
-  Reviews code diffs, PRs, issue queues, release readiness, git ship follow-through,
-  and project audits. Use when users ask in any language for code review, issue or PR triage,
-  release gates, publishing follow-through, or project audits.
-  Not for debugging root causes, prose review, or executing non-git VCS submits
-  (P4/SVN changelists route to explicit-only project skills).
-when_to_use: "review, 看看代码, 合并前, 看看issue, 看看PR, review my code, check changes, before merge, before release, release gate, git 提交前, git commit and push, publish follow-through, code review, code-review, audit, project audit, 项目体检, 项目评分, 给项目打分, 深入分析项目代码, 评估项目质量, 代码质量评分, scorecard, linus review, rate this codebase, score this project, 按计划实施, implement this plan"
-dispatch_intent: "Code review, before merge, release gates, plan execution, project-wide audit"
+  Reviews concrete code diffs and PRs, triages issue or PR queues, executes an explicitly
+  approved implementation plan, verifies Git ship or release readiness, and performs an
+  explicitly requested project-wide audit or scorecard. Trigger only when the user asks for
+  one of those actions. Handle read-only status or progress requests, `.plans` inspection,
+  task or coding-session monitoring, and history lookup through direct inspection. Route
+  root-cause diagnosis to hunt, prose review to write, and P4/SVN submits to their
+  explicit project workflows.
+when_to_use: "review this diff, review this PR, review my code, 看这次代码改动, 合并前检查, issue queue triage, PR queue triage, before merge, before release, release gate, git 提交前检查, commit and push these changes, publish this release, project-wide audit, project scorecard, 项目体检, 项目评分, 给项目打分, 深入分析项目代码质量, score this codebase, 按计划实施, implement this approved plan"
+dispatch_intent: "Explicit diff or PR review; approved-plan execution; Git ship or release follow-through; explicit project-wide audit or scorecard"
 ---
 
 <!-- Forked from Waza (MIT, © 2026 Tw93). Stripped GitHub-specific flows, added
@@ -17,6 +19,12 @@ dispatch_intent: "Code review, before merge, release gates, plan execution, proj
 
 Read the diff, find the problems, fix what can be fixed safely, ask about the rest.
 Done means verification ran in this session and passed.
+
+## Activation Boundary
+
+Enter this skill when the user explicitly requests review, approved-plan implementation,
+Git ship or release follow-through, or a project-wide audit/scorecard. Read-only inspection
+requests use direct repository or session inspection and return a concise status report.
 
 ## Outcome Contract
 
