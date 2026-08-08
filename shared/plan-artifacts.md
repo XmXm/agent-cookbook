@@ -29,10 +29,32 @@ printf ".plans/%03d-%s/\n" "$(( ${NEXT:-0} + 1 ))" "<slug>"
 
 | File | Content | Written by |
 |---|---|---|
-| `task_plan.md` | Design header (Goal, Building / Not Building, Approach, Key Decisions, Premise Collapse, External Dependencies, Verification Plan, Rollback) followed by phases, each with a concrete verification command; plus an optional Execution Playbook section (see below) | `plan`, at approval |
+| `task_plan.md` | Line after the title must be a one-line `状态：<current state>` status header (see below). Then the design header (Goal, Building / Not Building, Approach, Key Decisions, Premise Collapse, External Dependencies, Verification Plan, Rollback) followed by phases, each with a concrete verification command; plus an optional Execution Playbook section (see below) | `plan`, at approval; anyone who changes the plan's state updates the header |
 | `findings.md` | Research evidence and state snapshots; only when the work is research-heavy | `plan`; executors may append corrections |
 | `research/<topic>.md` | Optional. Full research reports (one file per investigation topic), preserving the complete file:line evidence, call trees, and comparison tables that `findings.md` had to condense away | `plan`, at approval, when research came from fan-out agents |
 | `progress.md` | Phase status as a rolling summary; only when execution spans sessions or is long-running | `plan` seeds it when warranted; `/check` Plan Execution updates it as phases complete |
+
+### The status header — the only aggregation mechanism
+
+`task_plan.md` opens with exactly one status line directly after the title
+(blank line between them):
+
+```text
+# 045 管家 Owner 动作卡与安全交付计划
+
+状态：已完成并部署（集成提交 `fe8f298`，生产 HEAD 已包含）
+```
+
+Freeform text after `状态：`, one line, current-state-first. Typical states:
+`已批准待实施` / `Phase N 进行中` / `已完成并部署` / `已收口（遗留降级为按需另启，见 progress.md）` /
+`已搁置`. Whoever changes the plan's real state — approval, phase completion,
+closeout, shelving — updates this line in the same change.
+
+This line is the *only* aggregation mechanism: "which plans are active" is
+answered by `head -3 .plans/*/task_plan.md` (or grep `^状态：`), never by a
+separate index file. Do not create `.plans/_index.json` or any status cache —
+per-directory status lines are the single source of truth, and caches have
+historically gone stale and misled sessions.
 
 ### research/ — why it exists
 
