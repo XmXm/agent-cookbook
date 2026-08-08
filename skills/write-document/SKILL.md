@@ -19,9 +19,32 @@ structures; it does not polish prose or remove AI tone — route deep polish to
 ## Outcome Contract
 
 - Outcome: a structured document matching the requested type, ready for its delivery channel.
-- Done when: the document has the correct skeleton, all sections are filled (no TBD), and the delivery route is named.
+- Done when: the document has the correct skeleton, every section is either filled from
+  real source material or explicitly marked 「待确认」 — never padded with invented
+  content — and the delivery route is named.
 - Evidence: source material (conversation, code, data), target audience, and delivery channel.
 - Output: the document file, plus the delivery route if applicable.
+
+## Rule Priority & Fact Fidelity
+
+<!-- Distilled from Fenng/Tech-Doc-Style-Chinese (MIT), idea reuse, no dependency. -->
+
+When rules conflict, resolve in this order — never sacrifice a higher level to
+satisfy a lower one (e.g. never drop a caveat to make a sentence shorter):
+
+1. Facts, constraints, safety and risk information.
+2. Explicit user instructions and target-project conventions.
+3. Terminology and machine-readable content accuracy.
+4. Structure, tone, and scannability.
+5. Punctuation, spacing, and typography.
+
+Fact fidelity:
+
+- Do not invent dates, numbers, deadlines, SLAs, capabilities, or conclusions
+  the source material does not provide; mark gaps 「待确认」 instead.
+- Do not drop preconditions, exceptions, risks, warnings, units, or defaults
+  when condensing.
+- Do not upgrade uncertainty to certainty: "可能 / 通常 / 计划" stays as written.
 
 ## Knowledge Preflight
 
@@ -51,6 +74,8 @@ so and proceed.
 - Incident summary → Timeline → Root cause → Impact → Fix → Lessons →
   Action items (owner + deadline).
 - Blameless tone. Focus on system failures, not individual mistakes.
+- State a root cause as certain only when evidence supports it; otherwise
+  write it as 可能原因 with the missing evidence named.
 
 ### Weekly Report (飞书周进展)
 
