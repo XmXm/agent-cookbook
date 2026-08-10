@@ -61,6 +61,8 @@ A refactor plan changes shape, not behavior. When the blast radius is unclear, r
 
 For "stress-test / 拷问 this plan" asks. Interview the user one question at a time, walking each branch of the design tree and resolving dependencies between decisions. For every question, give your recommended answer. Asking several questions at once is forbidden. If a question can be answered by reading the codebase, read the codebase instead.
 
+When the grill invalidates part of the plan, fold the fix in by rewriting the affected sections in place — the outcome of a grill is a better plan, never an addendum, amendment note, or fix phase (revision discipline in `shared/plan-artifacts.md`).
+
 ### Review (lightweight acceptance)
 
 For "did we build what was asked / 验收一下" after implementation. May: compare the diff against the approved plan and label **on target / drift / incomplete**, run the project's verification command, and check the hard-stop subset in [references/review-gate.md](references/review-gate.md). Must not: substitute for a full diff/release review. Heavy diff review, release gates, and project audits are out of scope for this mode.
@@ -93,6 +95,7 @@ out of scope, state so and proceed — preflight is non-blocking.
 
 - **No code before approval.** Design, Lightweight, Evaluate, and Refactor modes produce a stance, plan, or verdict only. Implementation starts when the user says "implement", "可以干", "直接改", or equivalent.
 - **No placeholders in an approved plan.** `TBD`, `TODO`, "implement later", "similar to step N", "details to be determined" mean the plan is not ready. Fill it or stop.
+- **Revise in place.** A plan is a pre-development document: fixing a flaw in it means producing a better plan, not planning a fix. Rewrite the affected sections so the document only ever states the current best decision — never keep the flawed text, append a fix phase, or add a revision log for content that has not been implemented; git carries the history. Executed-phase records are facts and are corrected by a new phase instead (see `shared/plan-artifacts.md`).
 - **Confirm the path first.** Run `pwd` / `git rev-parse --show-toplevel` before any filesystem operation. Never assume `~/project` and `~/www/project` are the same.
 - **The baseline branch is immovable.** The main checkout stays on the branch it was on when the plan was approved (the baseline, e.g. `dev`) for the whole life of the plan. Never `git switch` / `git checkout -b` the main checkout onto a feature branch — a parallel session merging into the baseline will silently land its commits on the wrong branch. Any work that needs a different branch happens inside a dedicated worktree.
 - **Worktrees exist only for true parallelism.** Non-concurrent (single-track) execution develops and commits directly on the current branch of the main checkout — no new branch, no new worktree. Create worktrees only when 2+ phases/tasks genuinely run at the same time; merge them back serially on the baseline branch.
@@ -120,6 +123,7 @@ out of scope, state so and proceed — preflight is non-blocking.
 | Small defined ask got the full design ritual | Problem defined + only "how" open = Lightweight: a 2-3 sentence stance |
 | Parallel session switched the main checkout to its feature branch; another session's `merge into dev` landed on that branch instead | Baseline branch is immovable; feature branches are checked out only inside worktrees |
 | Single-track plan spawned a worktree + branch for no concurrency | Worktrees only for true parallelism; otherwise develop directly on the current branch |
+| Review found a plan flaw; the fix was appended as a new phase / revision note | Unimplemented content is rewritten in place — the plan always reads as the current best plan, git carries the history |
 
 ## Output
 

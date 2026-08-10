@@ -29,7 +29,7 @@ printf ".plans/%03d-%s/\n" "$(( ${NEXT:-0} + 1 ))" "<slug>"
 
 | File | Content | Written by |
 |---|---|---|
-| `task_plan.md` | Line after the title must be a one-line `状态：<current state>` status header (see below). Then the design header (Goal, Building / Not Building, Approach, Key Decisions, Premise Collapse, External Dependencies, Verification Plan, Rollback) followed by phases, each with a concrete verification command; plus an optional Execution Playbook section (see below) | `plan`, at approval; anyone who changes the plan's state updates the header |
+| `task_plan.md` | Line after the title must be a one-line `状态：<current state>` status header (see below). Then the design header (Goal, Building / Not Building, Approach, Key Decisions, Premise Collapse, External Dependencies, Verification Plan, Rollback) followed by phases, each with a concrete verification command; plus an optional Execution Playbook section (see below) | `plan`, at approval; revisions rewrite affected sections in place (see Revision discipline); anyone who changes the plan's state updates the header |
 | `findings.md` | Research evidence and state snapshots; only when the work is research-heavy | `plan`; executors may append corrections |
 | `research/<topic>.md` | Optional. Full research reports (one file per investigation topic), preserving the complete file:line evidence, call trees, and comparison tables that `findings.md` had to condense away | `plan`, at approval, when research came from fan-out agents |
 | `progress.md` | Phase status as a rolling summary; only when execution spans sessions or is long-running | `plan` seeds it when warranted; `/check` Plan Execution updates it as phases complete |
@@ -55,6 +55,20 @@ answered by `head -3 .plans/*/task_plan.md` (or grep `^状态：`), never by a
 separate index file. Do not create `.plans/_index.json` or any status cache —
 per-directory status lines are the single source of truth, and caches have
 historically gone stale and misled sessions.
+
+### Revision discipline — the plan is the current decision, not a changelog
+
+A plan describes work that has not happened yet. When review, grill, or new
+evidence invalidates part of it, rewrite the affected sections of
+`task_plan.md` in place so the document always reads as the best current plan.
+Never keep the flawed text and layer a correction on top: no "修复 phase" for
+unimplemented content, no revision-history section, no amendment notes.
+Version history lives in git, not in the document.
+
+The one exception is the record of phases that have already executed
+(`progress.md` entries and completed-phase notes): those are facts, not plans.
+Correcting course after a phase has landed is expressed as a new phase; the
+executed record itself is never rewritten.
 
 ### research/ — why it exists
 
