@@ -1,22 +1,23 @@
 ---
-name: pc-wsl-docker
-description: Manage Docker containers and Compose stacks on the user's remote Windows PC that runs Docker inside WSL Debian, exposed to the LAN through Windows portproxy via `sync-ports.bat`. Use this whenever the user asks to start/stop/inspect a container, change a docker-compose stack, expose a service to the LAN, or do anything container-related on "PC", "我的电脑", "那台电脑", "the WSL box", "the home server", or any remote docker host reached via `ssh mt-pc` or direct WSL SSH `ssh mt-wsl`. Trigger even when the user does not explicitly mention WSL or portproxy — if the task is container CRUD or compose management and the target is not the local machine, default to this skill.
+name: pc-wsl
+description: Access and administer the user's remote Windows PC and its WSL Debian VM over SSH (`ssh mt-pc` for Windows side, `ssh mt-wsl` for WSL) — environment facts, port-exposure rules via `sync-ports.bat`, and Docker/Compose conventions when containers are involved. Use whenever a task targets "PC", "我的电脑", "那台电脑", "the WSL box", "the home server", or any command that must run on that remote Windows/WSL machine rather than the local Mac, including container or compose work on that host.
 ---
 
-# pc-wsl-docker
+# pc-wsl
 
-Operate Docker on the remote Windows PC where:
+The remote Windows PC environment:
 
+- A WSL Debian VM runs the user's Linux workloads.
 - Docker daemon lives **inside WSL Debian** (not Docker Desktop).
 - Compose stacks live in `~/docker/<stack-name>/compose.yaml` inside WSL.
-- Containers publish ports only to `127.0.0.1:<port>` inside WSL.
-- A Windows-side script `sync-ports.bat` mirrors every published port to `0.0.0.0:<port>` on the Windows host via `netsh portproxy`, making it reachable from the LAN.
+- WSL services (containers included) publish ports only to `127.0.0.1:<port>` inside WSL.
+- A Windows-side script `sync-ports.bat` mirrors published ports to `0.0.0.0:<port>` on the Windows host via `netsh portproxy`, making them reachable from the LAN. It manages **both** Docker-published ports (auto-diffed) and manually pinned ports.
 
 Use **`ssh mt-pc`** for Windows-side administration and portproxy sync. Use **`ssh mt-wsl`** for a direct shell inside WSL Debian after portproxy is healthy.
 
 ## Why the workflow exists
 
-Docker in WSL only exposes ports on the WSL VM's loopback. The LAN cannot reach WSL directly. `sync-ports.bat`:
+Services in WSL only expose ports on the WSL VM's loopback. The LAN cannot reach WSL directly. `sync-ports.bat`:
 
 1. Reads `docker ps --format '{{.Ports}}'` from WSL.
 2. Diffs against the previously managed set stored in `~/.config/caddy/ports/.portproxy-managed.txt`.
@@ -24,6 +25,8 @@ Docker in WSL only exposes ports on the WSL VM's loopback. The LAN cannot reach 
 4. Skips Caddy-owned ports (`80`, `443`, `2019`, `8090`) and keeps pinned ports (`9000`).
 
 This means: **every time published ports change, `sync-ports.bat` must run** — otherwise the LAN sees stale state.
+
+**Rule: never hand-edit portproxy rules with raw `netsh` commands.** They require elevation that plain command lines can't reliably get, and manual rules bypass the managed-state bookkeeping. Always go through `sync-ports.bat`; for a non-Docker service that needs a LAN port, add it to `$PinnedPorts` in `~/.config/caddy/sync-ports.ps1` (ask the user first), then run the sync.
 
 ## Connection cheatsheet
 
@@ -44,7 +47,7 @@ Notes:
 - `sync-ports.bat` is on `PATH` (`C:\bin\sync-ports.bat`) — call it bare.
 - The script auto-elevates via UAC, but the `ssh mt-pc` session already runs as Administrator, so it just works headless.
 
-## Standard workflow
+## Standard workflow (container-related tasks)
 
 For **every** container-related request that targets the PC, follow this loop. Do not skip steps even if the user only asked for the docker part — the LAN-facing exposure is the whole point of this setup.
 
@@ -155,11 +158,12 @@ ssh mt-pc 'sync-ports.bat'
 | LAN can't reach a new port, WSL `curl 127.0.0.1:<port>` works | Forgot `sync-ports.bat`, or port is in `ExcludePorts` | Run `sync-ports.bat`; pick a different port if it's `80/443/2019/8090`. |
 | `sync-ports.bat` says "Administrator privileges required" | SSH session not elevated for some reason | Re-run from a fresh `ssh mt-pc` — the session normally runs as Admin. |
 | `portproxy show all` lists a stale rule | Container was removed without re-syncing | Run `sync-ports.bat`; it will diff against the managed-state file and remove orphans. |
-| `wsl docker` hangs / errors right after Windows boot | WSL not yet started | `ssh mt-pc 'wsl -d Debian -- echo ready'` to warm it, then retry. |
-| Need to expose on a port that differs from the backend | Edit `$PinnedPorts` in `~/.config/caddy/sync-ports.ps1` (ask the user before changing). |
+| WSL commands hang / error right after Windows boot | WSL not yet started | `ssh mt-pc 'wsl -d Debian -- echo ready'` to warm it, then retry. |
+| `ssh mt-wsl` refused | WSL (or its `sshd`) not up, or `2222` portproxy rule missing | Warm WSL via `mt-pc` as above; check `netsh interface portproxy show all` for `2222`. |
+| Need to expose on a port that differs from the backend, or expose a non-Docker service | Pinned ports live in `$PinnedPorts` in `~/.config/caddy/sync-ports.ps1` (ask the user before changing), then run `sync-ports.bat`. |
 
 ## What this skill is NOT for
 
-- Local Docker on the user's Mac → just use `docker` directly.
+- Local work on the user's Mac (including local Docker) → run commands / `docker` directly.
 - Docker Desktop on Windows → this PC explicitly runs Docker inside WSL; don't suggest Docker Desktop commands.
 - Editing Caddy reverse-proxy config — Caddy owns `80/443/2019/8090` separately and is out of scope here; surface a note if the user seems to want HTTPS termination.
