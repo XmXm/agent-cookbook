@@ -2,14 +2,15 @@
 name: check
 description: >-
   Reviews concrete code diffs and PRs, triages issue or PR queues, executes an explicitly
-  approved implementation plan, verifies Git ship or release readiness, and performs an
-  explicitly requested project-wide audit or scorecard. Trigger only when the user asks for
-  one of those actions. Handle read-only status or progress requests, `.plans` inspection,
-  task or coding-session monitoring, and history lookup through direct inspection. Route
-  root-cause diagnosis to hunt, prose review to write, and P4/SVN submits to their
-  explicit project workflows.
-when_to_use: "review this diff, review this PR, review my code, 看这次代码改动, 合并前检查, issue queue triage, PR queue triage, before merge, before release, release gate, git 提交前检查, commit and push these changes, publish this release, project-wide audit, project scorecard, 项目体检, 项目评分, 给项目打分, 深入分析项目代码质量, score this codebase, 按计划实施, implement this approved plan"
-dispatch_intent: "Explicit diff or PR review; approved-plan execution; Git ship or release follow-through; explicit project-wide audit or scorecard"
+  approved implementation plan, runs an explicitly requested pre-ship or release check, and
+  performs an explicitly requested project-wide audit or scorecard. Trigger only when the
+  user asks for one of those actions. A bare commit or push request with no check intent is
+  a plain Git operation, not this skill. Handle read-only status or progress requests,
+  `.plans` inspection, task or coding-session monitoring, and history lookup through direct
+  inspection. Route root-cause diagnosis to hunt, prose review to write, and P4/SVN submits
+  to their explicit project workflows.
+when_to_use: "review this diff, review this PR, review my code, 看这次代码改动, 合并前检查, issue queue triage, PR queue triage, before merge, before release, release gate, 检查后再推送, review before push, publish this release, project-wide audit, project scorecard, 项目体检, 项目评分, 给项目打分, 深入分析项目代码质量, score this codebase, 按计划实施, implement this approved plan"
+dispatch_intent: "Explicit diff or PR review; approved-plan execution; explicitly requested pre-ship or release check; explicit project-wide audit or scorecard"
 ---
 
 <!-- Forked from Waza (MIT, © 2026 Tw93). Stripped GitHub-specific flows, added
@@ -23,7 +24,9 @@ Done means verification ran in this session and passed.
 ## Activation Boundary
 
 Enter this skill when the user explicitly requests review, approved-plan implementation,
-Git ship or release follow-through, or a project-wide audit/scorecard. Read-only inspection
+a checked ship or release ("检查后再推", release gate, publish), or a project-wide
+audit/scorecard. A bare "push" / "commit" / "推送一下" with no check intent is a plain Git
+operation — do it directly, do not enter this skill. Read-only inspection
 requests use direct repository or session inspection and return a concise status report.
 
 ## Outcome Contract
@@ -79,7 +82,8 @@ If a branch change is genuinely required, stop and ask.
 |---|---|
 | "implement this plan", "按计划实施", "可以干", "直接改" | [Plan Execution](#plan-execution-mode) |
 | Diff or PR ready, "review", "看看代码", "合并前" | Default review (start at [Get the Diff](#get-the-diff)) |
-| "commit", "push", "publish", "release" | [Ship / Release Follow-through](#ship--release-follow-through) |
+| "检查后再推", "review then push", "publish", "release" | [Ship / Release Follow-through](#ship--release-follow-through) |
+| Bare "push" / "commit" / "推送一下", no check intent | Not this skill — plain Git operation, do it directly |
 | "audit", "项目体检", "项目评分", "scorecard" | [Project Audit](#project-audit-mode) |
 | Document, PDF, prose review | Delegate to `/write` |
 
@@ -163,7 +167,17 @@ by severity.
 
 ## Ship / Release Follow-through
 
-Activate when the user asks to commit, tag, release, publish, or push.
+Activate only when the user asks for a checked ship: "检查后再推", tag, release,
+or publish. A bare "push" or "commit" with no check intent never enters this mode.
+
+**Short-circuit rule**: if the changes being shipped were already reviewed in this
+session, or this turn adds no new code diff, skip all review — no scope
+classification, no specialists, no re-verification. Run only the Worktree Safety
+Preflight, then execute the steps below.
+
+**User override**: if the user says "直接推" / "不要 review" / "skip the review",
+push immediately after the Worktree Safety Preflight. Do not re-run tests or
+re-inspect commits.
 
 1. Extract release rules per `references/project-context.md` (context shape,
    Release Gate 2.0 matrix, Safety Sink review).
