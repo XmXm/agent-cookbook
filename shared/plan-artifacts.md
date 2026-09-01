@@ -7,11 +7,14 @@ carrier for an approved decision, never the goal.
 
 ## When a plan file earns its keep
 
-- **Persist when** the work is non-trivial — multi-phase, 3+ steps, or spanning
-  sessions — or when the user asks for a plan file.
-- **Skip when** the ask is a single-step or lightweight change: leave the
-  approved plan in the conversation. Forcing a `.plans/` file for a one-line
-  fix is over-engineering.
+- **Persist when** the user's words call for a plan file — an explicit ask
+  ("落盘", "写个计划文件", "存到 .plans", naming a target directory), or a clear
+  statement that the plan will be executed in another session or by another
+  agent. Judge from the user's wording; task size or step count alone never
+  triggers persistence.
+- **Skip when** no such intent is expressed: leave the approved plan in the
+  conversation, however large the plan is. Proactively creating a `.plans/`
+  file the user did not ask for is over-engineering.
 
 ## Target directory
 

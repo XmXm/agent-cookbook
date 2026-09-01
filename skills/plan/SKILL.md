@@ -1,6 +1,6 @@
 ---
 name: plan
-description: "Take a position before any code: a quick 2-3 sentence stance on a small well-defined change (Lightweight), or a decision-complete plan — design and tradeoffs, opening the frame (格局, recommend the right target) vs grounding an over-ambitious idea (苟, a minimal verifiable first move), value judgment (Kill/Keep/Pivot) with multi-item triage, refactor planning, plan stress-testing, deep-module and domain vocabulary, lightweight acceptance against the approved plan, and persisting non-trivial plans (defaults to .plans/). A self-contained front door for code work; it decides and records the decision, it does not implement, debug, or review code."
+description: "Take a position before any code: a quick 2-3 sentence stance on a small well-defined change (Lightweight), or a decision-complete plan — design and tradeoffs, opening the frame (格局, recommend the right target) vs grounding an over-ambitious idea (苟, a minimal verifiable first move), value judgment (Kill/Keep/Pivot) with multi-item triage, refactor planning, plan stress-testing, deep-module and domain vocabulary, lightweight acceptance against the approved plan, and persisting plans when asked (defaults to .plans/). A self-contained front door for code work; it decides and records the decision, it does not implement, debug, or review code."
 when_to_use: "出方案, 给方案, 怎么设计, 用什么方案, 怎么弄合适, 哪种方式好, 快速判断怎么改, 判断一下, 值不值得, 要不要做, 有没有必要, 看看这几个需求, 重构怎么改, 重构方案, 帮我拷问这个计划, 验收一下, 打开格局, 格局太小, 站高一点, 别太保守, 太飘, 太理想化, 怎么落地, 先落地, 收一收, 苟一下, plan this, how should I design, what's the best approach, quick take, refactor plan, is this worth it, grill this plan, did we build what was asked, think bigger, make this real, what do I do first"
 dispatch_intent: "New feature design, architecture, value judgment, refactor planning, plan stress-test, acceptance against an approved plan"
 allowed-tools: "Read, Grep, Glob, Bash, WebFetch, WebSearch, Edit, Write"
@@ -72,10 +72,11 @@ For "did we build what was asked / 验收一下" after implementation. May: comp
 The persistence contract lives in `shared/plan-artifacts.md`: when a plan file
 earns its keep, the `.plans/<NNN>-<slug>/` layout, the roles of `task_plan.md`
 / `findings.md` / `research/` / `progress.md`, and the anti-bloat discipline.
-In short: persist only when the work is multi-phase, 3+ steps, or spans
-sessions — or when the user asks. A lightweight plan stays in the conversation;
-the file is a carrier for the decision, never the goal. When the plan came from
-fan-out research or will be executed outside this session, also persist the
+In short: persist only when the user's words call for a plan file — an explicit
+ask, a named target directory, or a stated cross-session / detached execution.
+Absent that intent the plan stays in the conversation regardless of size;
+the file is a carrier for the decision, never the goal. When a persisted plan
+came from fan-out research or will be executed outside this session, also persist the
 full research reports to `research/` and write the Execution Playbook section
 (orchestration discipline, copy-pasteable gates, context entry points), then
 run the detached-execution self-check in [references/handoff.md](references/handoff.md).
@@ -139,4 +140,4 @@ out of scope, state so and proceed — preflight is non-blocking.
 
 **Evaluate:** one `Kill` / `Keep` / `Pivot` verdict + three reasons. No options list.
 
-After approval, stop. Persist the plan to a directory only when the work is non-trivial or the user asks (see Persist the Plan); a lightweight plan stays in the conversation. Implementation starts when the user says so; afterward, use Review mode for acceptance.
+After approval, stop. Persist the plan to a directory only when the user's words call for it (see Persist the Plan); otherwise the plan stays in the conversation. Implementation starts when the user says so; afterward, use Review mode for acceptance.
