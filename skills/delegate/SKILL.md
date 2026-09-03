@@ -27,7 +27,8 @@ disable-model-invocation: true
   → Phase 0 ROI 门（劝退 / 单派 / 拆分并发）+ 路由（能力矩阵选 agent）
   → Phase 1 方案（Claude，plan 门标准；并发时按子任务拆分）
   → 用户确认方案（调用时已说"直接干"则跳过）
-  → Phase 2 派发（单实例或并发多实例；codex / claude 走 Agent 工具，其余走 CLI）
+  → Phase 2 派发（单实例 / 并发多实例 / workflow；codex、claude 走 Agent 工具，
+     workflow 走脚本且每个 agent 钉 opus，其余走 CLI）
   → Phase 3 验收（Claude 本会话实证核对；并发时逐子任务 + 整体集成）
       ├─ PASS → 收尾
       └─ FAIL → delta 回派同 session（≤2 轮）→ 升梯队重派（限 1 次）→ 交用户
@@ -65,7 +66,7 @@ ROI 按三要素判断：
 
 | Agent | 调用方式 | 质量 | 速度 | 成本 | 定位 |
 |---|---|---|---|---|---|
-| claude · opus | Agent 工具 → `general-purpose` + `model: "opus"` | ★★★★★ | ★★★ | 同主会话订阅 | **默认通道**：用户未点名 agent 时一律走这里 |
+| claude · opus | Agent 工具 → `general-purpose` + `model: "opus"`；多实例可走 workflow（`agent(..., { model: 'opus' })`） | ★★★★★ | ★★★ | 同主会话订阅 | **默认通道**：用户未点名 agent 时一律走这里 |
 | codex | Agent 工具 → `codex:codex-rescue` | ★★★★★ | ★★★ | 订阅 | 点名档：用户要省 Claude 额度或点名 codex 时的一梯队 |
 | kimi | `kimi -p "<prompt>"` | ★★★★ | ★★★★★ | 订阅 | 二梯队首选：中等复杂度、要快 |
 | pi · glm-5.2 | `pi --model litellm/glm-5.2 -p` | ★★★★ | ★★★ | 中低 | 准一梯队替补：省 codex 额度 |
@@ -200,13 +201,20 @@ agent 拿到后**不需要再做任何设计决策**。小任务（对应 plan �
   与 session id；codex / claude 多实例 = 同一消息里多个并行 Agent 调用（claude
   每个实例各自传 `model: "opus"` 与不同 `name`）。
 - 并发上限 3-4 实例，再多验收吞不下、机器也扛不住。
-- **workflow 例外**：大批量同构子任务（≥5 个、每个都是同一模板套不同文件）超出
-  3-4 并发上限时，可改走 Claude Code dynamic workflow——一条脚本 `pipeline()`
-  逐项起 subagent，每个 `agent()` 调用显式指定 `model: 'opus'`（脚本里指定的
-  模型视同 per-invocation，优先于主会话模型）。两条限制：(1) workflow 关键词只
-  认用户手输，Claude 不主动把单派/并发改成 workflow，需用户在 `/delegate` 调用
-  里点名 "workflow"；(2) workflow 每个 agent 的结果落在脚本变量里，验收时按
-  Phase 3 逐子任务核对仍是 Claude 的活，脚本的 report 不能替代实证。
+- **workflow 通道**（Claude Code dynamic workflow，claude · opus 的多实例形态）。
+  两种进入方式：(a) 用户在 `/delegate` 调用里点名 "workflow" / "ultracode"；
+  (b) 会话已开 `/effort ultracode`，Claude 自行判断这次派发值得编排成 workflow
+  ——ultracode 下这是正常路径，不需要用户再点名。适用画像：子任务 ≥5 且同构，
+  或子任务数超出 3-4 并发上限。非 ultracode 会话、用户也没点名时，不主动走
+  workflow。
+  **脚本契约**：每个 `agent()` 调用**必须**传 `model: 'opus'`——
+  `agent(prompt, { model: 'opus', label: '<子任务名>' })`，`pipeline()` /
+  `parallel()` 里每个 stage 的 `agent()` 同样。不能省：内置 workflow-authoring
+  指引默认建议省略 `model` 以继承主会话模型，主会话若是 sonnet，整条 flow 就是
+  sonnet。`effort` 可按 stage 分档（机械 stage `'low'`，实施/判定 stage 继承）；
+  并行 stage 会改同一批文件时用 `isolation: 'worktree'`，否则靠文件集不相交。
+  每个 agent 的 prompt 仍是六块骨架。验收：workflow 结果落在脚本变量里，Phase 3
+  逐子任务 + 整体集成的实证核对仍是 Claude 的活，脚本末尾的 report 不能替代。
 - agent 干活期间 Claude 不并行改同一批文件，也不预写"备用实现"。
 
 ## Phase 3 — 验收（Claude）
