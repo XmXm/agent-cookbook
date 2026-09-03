@@ -1,14 +1,15 @@
 ---
 name: delegate
 description: >-
-  多 coding agent 委派门：Claude 只做方案、路由与验收，编码实施委派给外部
-  coding agent（Codex 主力 / Claude Code opus subagent 同质替补 / kimi 最快 /
-  pi 按模型分档 / copilot 特批档）。
+  多 coding agent 委派门：Claude 只做方案、路由与验收，编码实施委派给
+  coding agent（默认 Claude Code 原生 opus subagent；用户点名时走 Codex /
+  kimi / pi / copilot 等外部 agent）。
   内置 ROI 门（复杂度 × token 成本 × 时间成本）决定自己做还是委派、派给谁、
   是否拆分并发多实例。仅当用户显式调用 /delegate 时使用；绝不主动触发，
   绝不因为"任务看起来像开发任务"而自动进入此模式。
-  Multi-agent delegation: Claude plans, routes and accepts; external agents
-  implement. User-invoked only, never trigger proactively.
+  Multi-agent delegation: Claude plans, routes and accepts; a native opus
+  subagent implements by default, external agents when the user names one.
+  User-invoked only, never trigger proactively.
 argument-hint: "<要实现的任务描述> [直接干 = 跳过方案确认]"
 disable-model-invocation: true
 ---
@@ -50,7 +51,8 @@ ROI 按三要素判断：
 判定输出三选一：
 
 1. **劝退**：琐碎任务（约 20 行以内、单文件、意图无歧义、typo/纯配置）——
-   提醒用户往返开销高于收益，问是否仍派。用户坚持则照走，选免费或最快档。
+   提醒用户往返开销高于收益，问是否仍派。用户坚持则照走，默认仍 claude · opus；
+   用户点名省额度时选免费或最快档。
 2. **单派**：一个 agent 一次派发，按下方路由表选。
 3. **拆分并发**：任务能拆成 ≥2 个**文件集不相交**的独立子任务时，逐个子任务
    路由（可同 agent 多实例，也可多 agent 混编），并发派发。
@@ -63,40 +65,41 @@ ROI 按三要素判断：
 
 | Agent | 调用方式 | 质量 | 速度 | 成本 | 定位 |
 |---|---|---|---|---|---|
-| codex | Agent 工具 → `codex:codex-rescue` | ★★★★★ | ★★★ | 订阅 | 主力：复杂实现、跨文件重构、需强推理 |
-| claude · opus | Agent 工具 → `general-purpose` + `model: "opus"` | ★★★★★ | ★★★ | 同主会话订阅 | 一梯队同质替补：codex 不可用/额度紧；需吃 CLAUDE.md、项目 skill、MCP 的任务 |
+| claude · opus | Agent 工具 → `general-purpose` + `model: "opus"` | ★★★★★ | ★★★ | 同主会话订阅 | **默认通道**：用户未点名 agent 时一律走这里 |
+| codex | Agent 工具 → `codex:codex-rescue` | ★★★★★ | ★★★ | 订阅 | 点名档：用户要省 Claude 额度或点名 codex 时的一梯队 |
 | kimi | `kimi -p "<prompt>"` | ★★★★ | ★★★★★ | 订阅 | 二梯队首选：中等复杂度、要快 |
 | pi · glm-5.2 | `pi --model litellm/glm-5.2 -p` | ★★★★ | ★★★ | 中低 | 准一梯队替补：省 codex 额度 |
 | pi · deepseek-v4-pro | `pi --model deepseek/deepseek-v4-pro -p` | ★★★ | ★★★★ | 低 | 小而明确的任务 |
 | pi · MiniMax-M3 | `pi --model minimax-cn/MiniMax-M3 -p` | ★★ | ★★★ | 免费 | 琐碎/批量/试探，失败零成本 |
 | copilot · fable-5 | `copilot --model claude-fable-5 -p` | ★★★★★ | ★★ | 额度紧 | 特批档，见下方红线 |
 
+**默认规则**：用户在 `/delegate` 调用里**没有点名任何 agent**，就走 claude · opus，
+不按复杂度挑外部 agent。理由：零外部依赖（不需要 CLI、不需要额外认证），天然
+继承 CLAUDE.md 层级、项目 skill、MCP 与权限规则——需要 `cs-coding` 这类项目
+规范的任务，它比外部 CLI agent 少一层"看不到项目约定"的风险。代价是烧主会话
+同一份订阅（见 Phase 0 特殊账）；想省额度必须由用户点名外部 agent。
+
 **copilot 红线**：订阅额度有限，默认永不路由到 copilot。仅当 (a) 用户点名要用，
-或 (b) codex 与 claude · opus 都不可用且任务确需一梯队质量时，**先询问用户同意**
-再派。
+或 (b) 用户点名了外部一梯队（codex）但它不可用、且 claude · opus 也不可用时，
+**先询问用户同意**再派。
 
-**claude · opus 定位**：与 codex 同档质量，但零外部依赖（不需要 CLI、不需要额外
-认证），且天然继承 CLAUDE.md 层级、项目 skill、MCP 与权限规则——需要 `cs-coding`
-这类项目规范的任务它比外部 CLI agent 少一层"看不到项目约定"的风险。默认仍
-先 codex（省 Claude 订阅额度），codex 不可用或额度紧时它是第一替补，无需询问。
+路由表（用户点名 → agent；未点名一律 claude · opus）：
 
-路由表（复杂度 → 默认 agent）：
-
-| 任务画像 | 派给 |
+| 用户说法 | 派给 |
 |---|---|
-| 复杂、大改动、设计敏感、需强推理 | codex |
-| 同上但 codex 不可用/额度紧，或改动重度依赖项目 skill/CLAUDE.md 约定 | claude · opus |
-| 用户点名"用 claude subagent / 用 opus" | claude · opus |
-| 中等复杂度、要快 | kimi |
-| 中等复杂度、不急、想省 codex 额度 | pi · glm-5.2 |
-| 小而明确 | pi · deepseek-v4-pro（要快则 kimi） |
-| 琐碎但用户坚持委派、大批量同构任务 | pi · MiniMax-M3 |
-| 需一梯队质量但 codex 与 claude · opus 都不可用 | 询问用户 → copilot · fable-5 |
+| 未点名 agent（默认） | claude · opus |
+| "用 codex" / "省 Claude 额度" + 复杂、大改动、需强推理 | codex |
+| "用 kimi" / "省额度且要快" | kimi |
+| "用 pi" / "省额度、不急" | pi · glm-5.2（中等）/ pi · deepseek-v4-pro（小而明确） |
+| "用免费的" / 琐碎批量试探 | pi · MiniMax-M3 |
+| "用 copilot" | 询问用户确认 → copilot · fable-5 |
+| 只说"外部 agent"/"别用 claude"但没指定哪个 | 按复杂度：复杂 → codex，中等要快 → kimi，小 → pi · deepseek-v4-pro |
 
-可用性替补：所选 agent 缺失或未认证时（codex → `/codex:setup`；kimi →
-`kimi login`；pi → 对应 provider API key；copilot → `copilot login`；claude ·
-opus → 当前会话没有 `Agent` 工具，或 `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` 已设
-导致 `model` 参数被忽略），报告并按矩阵选同档或降半档替补（copilot 仍需询问）；
+可用性替补：所选 agent 缺失或未认证时（claude · opus → 当前会话没有 `Agent`
+工具，或 `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` 已设导致 `model` 参数被忽略；
+codex → `/codex:setup`；kimi → `kimi login`；pi → 对应 provider API key；
+copilot → `copilot login`），报告并按矩阵选同档或降半档替补——点名的外部 agent
+不可用时首选替补是 claude · opus（除非用户明说不用 Claude），copilot 仍需询问；
 全部不可用则**停**——不降级为 Claude 自己实施，也不伪造结果。
 
 ## Phase 1 — 方案（Claude）
@@ -228,7 +231,8 @@ diff 里查子任务边界有没有互相踩踏、接口约定双方签名是否
 - **PASS**：报告验收结果（逐条标准 + 证据），进收尾。
 - **FAIL**：把问题清单写成 delta 指令（只说差量，不重述全方案），按各 agent
   的 resume 方式回派**同一 session**。最多 2 轮返工。仍不过 → 允许**一次**
-  升梯队重派（如 MiniMax→kimi、kimi→codex），新 prompt 里写清失败历史与已试
+  升梯队重派（如 MiniMax→kimi、kimi→codex 或 claude · opus；claude · opus 自身
+  失败则升 codex，反之亦然），新 prompt 里写清失败历史与已试
   路径，避免重蹈；升梯队仍不过则停下，把现状与问题清单交用户裁决。
   Claude 接手实施必须由用户明说。
 

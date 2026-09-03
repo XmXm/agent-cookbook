@@ -28,7 +28,7 @@ Each covers one phase of a task; they do not chain automatically.
 
 | Trigger | Skill |
 |---|---|
-| User explicitly invokes `/delegate` only (never auto-routed): ROI-gated dispatch to coding agents (codex / Claude Code opus subagent / kimi / pi / copilot), concurrent multi-instance capable; Claude plans + routes + accepts | `skills/delegate/SKILL.md` |
+| User explicitly invokes `/delegate` only (never auto-routed): ROI-gated dispatch to coding agents (default: Claude Code opus subagent; codex / kimi / pi / copilot when the user names one), concurrent multi-instance capable; Claude plans + routes + accepts | `skills/delegate/SKILL.md` |
 
 ### Design And Style
 
