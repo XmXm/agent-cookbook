@@ -2,7 +2,8 @@
 name: delegate
 description: >-
   多 coding agent 委派门：Claude 只做方案、路由与验收，编码实施委派给外部
-  coding agent（Codex 主力 / kimi 最快 / pi 按模型分档 / copilot 特批档）。
+  coding agent（Codex 主力 / Claude Code opus subagent 同质替补 / kimi 最快 /
+  pi 按模型分档 / copilot 特批档）。
   内置 ROI 门（复杂度 × token 成本 × 时间成本）决定自己做还是委派、派给谁、
   是否拆分并发多实例。仅当用户显式调用 /delegate 时使用；绝不主动触发，
   绝不因为"任务看起来像开发任务"而自动进入此模式。
@@ -25,7 +26,7 @@ disable-model-invocation: true
   → Phase 0 ROI 门（劝退 / 单派 / 拆分并发）+ 路由（能力矩阵选 agent）
   → Phase 1 方案（Claude，plan 门标准；并发时按子任务拆分）
   → 用户确认方案（调用时已说"直接干"则跳过）
-  → Phase 2 派发（单实例或并发多实例；codex 走 Agent 工具，其余走 CLI）
+  → Phase 2 派发（单实例或并发多实例；codex / claude 走 Agent 工具，其余走 CLI）
   → Phase 3 验收（Claude 本会话实证核对；并发时逐子任务 + 整体集成）
       ├─ PASS → 收尾
       └─ FAIL → delta 回派同 session（≤2 轮）→ 升梯队重派（限 1 次）→ 交用户
@@ -41,6 +42,10 @@ ROI 按三要素判断：
   差值才是委派省下的钱；差值小于往返开销就不值得派。
 - **时间成本**：串行单任务时 Claude 自己做往往更快；子任务可并行时委派赢——
   多实例同时跑，墙上时间取最慢者而非求和。
+- **claude subagent 的特殊账**：派给 Claude Code 自己的 opus subagent 省的是
+  **主会话上下文**（实现细节、工具输出不进主窗口），**不省订阅额度**——它和
+  主会话同一个订阅在烧。所以它的 ROI 只看复杂度与上下文压力，不看 token 差值；
+  想省额度选 codex / pi。
 
 判定输出三选一：
 
@@ -59,6 +64,7 @@ ROI 按三要素判断：
 | Agent | 调用方式 | 质量 | 速度 | 成本 | 定位 |
 |---|---|---|---|---|---|
 | codex | Agent 工具 → `codex:codex-rescue` | ★★★★★ | ★★★ | 订阅 | 主力：复杂实现、跨文件重构、需强推理 |
+| claude · opus | Agent 工具 → `general-purpose` + `model: "opus"` | ★★★★★ | ★★★ | 同主会话订阅 | 一梯队同质替补：codex 不可用/额度紧；需吃 CLAUDE.md、项目 skill、MCP 的任务 |
 | kimi | `kimi -p "<prompt>"` | ★★★★ | ★★★★★ | 订阅 | 二梯队首选：中等复杂度、要快 |
 | pi · glm-5.2 | `pi --model litellm/glm-5.2 -p` | ★★★★ | ★★★ | 中低 | 准一梯队替补：省 codex 额度 |
 | pi · deepseek-v4-pro | `pi --model deepseek/deepseek-v4-pro -p` | ★★★ | ★★★★ | 低 | 小而明确的任务 |
@@ -66,23 +72,32 @@ ROI 按三要素判断：
 | copilot · fable-5 | `copilot --model claude-fable-5 -p` | ★★★★★ | ★★ | 额度紧 | 特批档，见下方红线 |
 
 **copilot 红线**：订阅额度有限，默认永不路由到 copilot。仅当 (a) 用户点名要用，
-或 (b) codex 不可用且任务确需一梯队质量时，**先询问用户同意**再派。
+或 (b) codex 与 claude · opus 都不可用且任务确需一梯队质量时，**先询问用户同意**
+再派。
+
+**claude · opus 定位**：与 codex 同档质量，但零外部依赖（不需要 CLI、不需要额外
+认证），且天然继承 CLAUDE.md 层级、项目 skill、MCP 与权限规则——需要 `cs-coding`
+这类项目规范的任务它比外部 CLI agent 少一层"看不到项目约定"的风险。默认仍
+先 codex（省 Claude 订阅额度），codex 不可用或额度紧时它是第一替补，无需询问。
 
 路由表（复杂度 → 默认 agent）：
 
 | 任务画像 | 派给 |
 |---|---|
 | 复杂、大改动、设计敏感、需强推理 | codex |
+| 同上但 codex 不可用/额度紧，或改动重度依赖项目 skill/CLAUDE.md 约定 | claude · opus |
+| 用户点名"用 claude subagent / 用 opus" | claude · opus |
 | 中等复杂度、要快 | kimi |
 | 中等复杂度、不急、想省 codex 额度 | pi · glm-5.2 |
 | 小而明确 | pi · deepseek-v4-pro（要快则 kimi） |
 | 琐碎但用户坚持委派、大批量同构任务 | pi · MiniMax-M3 |
-| 需一梯队质量但 codex 不可用 | 询问用户 → copilot · fable-5 |
+| 需一梯队质量但 codex 与 claude · opus 都不可用 | 询问用户 → copilot · fable-5 |
 
 可用性替补：所选 agent 缺失或未认证时（codex → `/codex:setup`；kimi →
-`kimi login`；pi → 对应 provider API key；copilot → `copilot login`），报告
-并按矩阵选同档或降半档替补（copilot 仍需询问）；全部不可用则**停**——不降级为
-Claude 自己实施，也不伪造结果。
+`kimi login`；pi → 对应 provider API key；copilot → `copilot login`；claude ·
+opus → 当前会话没有 `Agent` 工具，或 `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` 已设
+导致 `model` 参数被忽略），报告并按矩阵选同档或降半档替补（copilot 仍需询问）；
+全部不可用则**停**——不降级为 Claude 自己实施，也不伪造结果。
 
 ## Phase 1 — 方案（Claude）
 
@@ -156,6 +171,15 @@ agent 拿到后**不需要再做任何设计决策**。小任务（对应 plan �
 
 - **codex**：Agent 工具，`subagent_type: "codex:codex-rescue"`。小而有界前台等；
   长任务加 `--background`。不指定 `--model`/`--effort`，除非用户明确要求。
+- **claude · opus**（契约来自官方文档 + 本机 Claude Code ≥ 2.1.259，实测待校准）：
+  Agent 工具，`subagent_type: "general-purpose"`，**必须**显式传 `model: "opus"`
+  （不传则继承主会话模型，主会话若是 sonnet 就派成了 sonnet），并传
+  `name: "<子任务短名>"` 让它可寻址。prompt 用 markdown 小节版骨架。小而有界
+  前台等；长任务 `run_in_background: true`。需要项目规范时在 `<task>` 里写明
+  "先 `Skill(cs-coding)` 再动笔"——subagent 自动加载 CLAUDE.md 层级，但 skill
+  要它自己拉。**返工**：`SendMessage` 给同名 subagent 发 delta，它自动 resume
+  且沿用 opus（v2.1.211+ 保证 resume 不丢 `model` 参数），不要重新起一个 Agent。
+  不派给 `Explore`/`Plan` 内置 subagent——它们只读，写不了代码。
 - **kimi**：`kimi -p "<prompt>"`。prompt 模式自动批准工具，**不能**加 `--yolo`
   （互斥报错）。输出末尾有 `To resume this session: kimi -r <session-id>`，
   捕获它供返工回派：`kimi -r <session-id> -p "<delta>"`。
@@ -170,8 +194,16 @@ agent 拿到后**不需要再做任何设计决策**。小任务（对应 plan �
 - 一次派发只做一件事；不相关的诉求拆成多次派发。
 - CLI agent 在仓库根目录起进程（cwd 决定它看到的项目）。
 - 并发时每实例独立 `run_in_background` Bash 任务跑，结束后从输出提取改动摘要
-  与 session id；codex 多实例 = 同一消息里多个并行 Agent 调用。
+  与 session id；codex / claude 多实例 = 同一消息里多个并行 Agent 调用（claude
+  每个实例各自传 `model: "opus"` 与不同 `name`）。
 - 并发上限 3-4 实例，再多验收吞不下、机器也扛不住。
+- **workflow 例外**：大批量同构子任务（≥5 个、每个都是同一模板套不同文件）超出
+  3-4 并发上限时，可改走 Claude Code dynamic workflow——一条脚本 `pipeline()`
+  逐项起 subagent，每个 `agent()` 调用显式指定 `model: 'opus'`（脚本里指定的
+  模型视同 per-invocation，优先于主会话模型）。两条限制：(1) workflow 关键词只
+  认用户手输，Claude 不主动把单派/并发改成 workflow，需用户在 `/delegate` 调用
+  里点名 "workflow"；(2) workflow 每个 agent 的结果落在脚本变量里，验收时按
+  Phase 3 逐子任务核对仍是 Claude 的活，脚本的 report 不能替代实证。
 - agent 干活期间 Claude 不并行改同一批文件，也不预写"备用实现"。
 
 ## Phase 3 — 验收（Claude）
