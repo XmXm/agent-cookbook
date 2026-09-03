@@ -136,7 +136,14 @@ print("ok: resolver active references")
 ref_pattern = re.compile(r"(?<![/.])\b(?:references|agents|scripts)/[\w/.-]+\b")
 for path in skill_files:
     text = path.read_text()
-    for ref in sorted(set(ref_pattern.findall(text))):
+    refs = set()
+    for m in ref_pattern.finditer(text):
+        # Skip glob patterns like `scripts/lark_*.py` (upstream lark-skills
+        # docs); the regex truncates them at `*`, yielding a bogus path.
+        if text[m.end():m.end() + 1] == "*":
+            continue
+        refs.add(m.group(0))
+    for ref in sorted(refs):
         expected = path.parent / ref
         if not expected.exists():
             fail(f"BROKEN REFERENCE: {path} references {ref}")
