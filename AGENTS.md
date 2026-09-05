@@ -64,7 +64,7 @@ coding guide (symlinked from `mt-skills/`):
 | Door | What it does |
 |---|---|
 | `plan` | Design, evaluate, refactor-plan, grill, acceptance. Produces the plan; does not implement code. |
-| `check` | Code review, plan execution ("按计划实施"), release follow-through, project audit. |
+| `check` | Code review, plan execution, release follow-through, project audit. User-invoked only (`/check` or an explicit "review 一下"); never auto-triggered. |
 | `hunt` | Root-cause diagnosis for errors, regressions, broken behavior. |
 | `write-document` | Structured document creation (README, design doc, postmortem, weekly report, KB knowledge, Feishu delivery). |
 | `cs-coding` | C# authoring guide for MLBB battle core — read before writing. |

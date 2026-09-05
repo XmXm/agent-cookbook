@@ -59,9 +59,10 @@ When the user asks to export a handoff, or the environment prevents further exec
 ## Execution entry point
 
 When the user approves the plan and says "implement" / "可以干" / "按计划实施",
-execution enters through `/check` Plan Execution mode — it works through the
-plan phases as a to-do list, verifies each, and transitions to Ship when done.
-`plan` itself does not implement code.
+implement directly, working through the plan phases as a to-do list and verifying
+each. If the user invokes `/check`, its Plan Execution mode owns that loop and
+transitions to Ship when done; do not enter `check` on your own. `plan` itself
+does not implement code.
 
 ## Persisting the plan
 

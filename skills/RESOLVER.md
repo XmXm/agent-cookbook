@@ -14,7 +14,7 @@ Each covers one phase of a task; they do not chain automatically.
 | Trigger | Skill |
 |---|---|
 | Rough idea, architecture, value judgment, refactor plan, plan stress-test, acceptance | `skills/plan/SKILL.md` |
-| Diff review, merge readiness, plan execution ("按计划实施"), release follow-through, project audit | `skills/check/SKILL.md` |
+| User explicitly invokes `/check` or asks for a code review ("review 一下"); other modes (plan execution, release gate, project audit) only via `/check`; never auto-triggered | `skills/check/SKILL.md` |
 | Error, crash, regression, failing test, broken behavior, screenshot-reported defect | `skills/hunt/SKILL.md` |
 | Structured document creation: README, design doc, postmortem, weekly report, KB knowledge, Feishu delivery | `skills/write-document/SKILL.md` |
 
@@ -114,7 +114,7 @@ now covers the same need:
 
 - Read the matched skill before acting.
 - When several skills match, choose the most specific workflow.
-- For completed implementation work, use `check`; for broken behavior, use `hunt`.
+- `check` is user-invoked only: `/check` or an explicit code review request ("review 一下"). Never enter it from commit/push, release, or "按计划实施" wording. For broken behavior, use `hunt`.
 - For UI taste and composition work, use `ui` (upstream Waza renamed `design` → `ui` at df08298 to stop shadowing Claude Code's built-in `/design`); for UI regressions, use `hunt`.
 - `write-document` creates structured documents; `write` polishes/rewrites prose and removes AI tone. They do not overlap.
-- `plan` produces the plan; `check` Plan Execution mode implements it. `plan` does not write code.
+- `plan` produces the plan; implementation happens directly, or through `check` Plan Execution mode when the user invokes `/check`. `plan` does not write code.

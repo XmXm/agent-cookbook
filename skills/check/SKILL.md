@@ -1,16 +1,16 @@
 ---
 name: check
 description: >-
-  Reviews concrete code diffs and PRs, triages issue or PR queues, executes an explicitly
-  approved implementation plan, runs an explicitly requested pre-ship or release check, and
-  performs an explicitly requested project-wide audit or scorecard. Trigger only when the
-  user asks for one of those actions. A bare commit or push request with no check intent is
-  a plain Git operation, not this skill. Handle read-only status or progress requests,
-  `.plans` inspection, task or coding-session monitoring, and history lookup through direct
-  inspection. Route root-cause diagnosis to hunt, prose review to write, and P4/SVN submits
-  to their explicit project workflows.
-when_to_use: "review this diff, review this PR, review my code, 看这次代码改动, 合并前检查, issue queue triage, PR queue triage, before merge, before release, release gate, 检查后再推送, review before push, publish this release, project-wide audit, project scorecard, 项目体检, 项目评分, 给项目打分, 深入分析项目代码质量, score this codebase, 按计划实施, implement this approved plan"
-dispatch_intent: "Explicit diff or PR review; approved-plan execution; explicitly requested pre-ship or release check; explicit project-wide audit or scorecard"
+  Code review door: reviews diffs and PRs, executes an approved implementation plan
+  ("按计划实施"), runs a pre-ship or release gate, and performs a project-wide audit or
+  scorecard. User-invoked only: enter this skill when the user names it — "/check",
+  "用 check", "走 check", "check 一下" — or explicitly asks for a code review ("review
+  一下", "review this diff/PR", "帮我 review 代码"). Never trigger proactively from a
+  diff you happen to see, a commit or push, a completed task, or a plan that looks ready
+  to implement; handle those directly and mention that /check is available if a full
+  review would help. Route root-cause diagnosis to hunt and prose review to write.
+when_to_use: "/check, 用 check, 走 check, check 一下, 跑一下 check, review 一下, review this diff, review this PR, review my code, 帮我 review 代码, 用 check 按计划实施"
+dispatch_intent: "Explicit /check invocation or an explicit code review request; never inferred from commit/push, plan execution, release, or audit wording"
 ---
 
 <!-- Forked from Waza (MIT, © 2026 Tw93). Stripped GitHub-specific flows, added
@@ -23,11 +23,15 @@ Done means verification ran in this session and passed.
 
 ## Activation Boundary
 
-Enter this skill when the user explicitly requests review, approved-plan implementation,
-a checked ship or release ("检查后再推", release gate, publish), or a project-wide
-audit/scorecard. A bare "push" / "commit" / "推送一下" with no check intent is a plain Git
-operation — do it directly, do not enter this skill. Read-only inspection
-requests use direct repository or session inspection and return a concise status report.
+User-invoked only. Enter this skill when the user names it ("/check", "用 check",
+"走 check", "check 一下") or explicitly asks for a code review ("review 一下", "review
+this diff/PR", "帮我 review 代码") — then pick the mode from what they ask for: review,
+approved-plan implementation, ship/release gate, or project-wide audit/scorecard. Do not
+infer entry from other wording: "按计划实施", "推送前检查一下", "给项目打分" without
+naming check or asking for a review are handled directly, with a one-line note that
+/check is available if a full review would help. A bare "push" / "commit" / "推送一下"
+is a plain Git operation. Read-only inspection requests use direct repository or
+session inspection and return a concise status report.
 
 ## Outcome Contract
 
@@ -89,8 +93,9 @@ If a branch change is genuinely required, stop and ask.
 
 ## Plan Execution Mode
 
-Activate when the user's message starts with "Implement the following plan",
-"按计划实施", "可以干", "直接改", or links to a `/plan` output.
+Once inside check (user invoked it), use this mode when the message says "Implement
+the following plan", "按计划实施", "可以干", "直接改", or links to a `/plan` output.
+Those phrases alone, without `/check`, do not open this skill.
 
 1. State which plan is being executed (first heading or summary line).
 2. Check for repo drift: `git status --short --branch` and skim changed files that contradict the plan. If drift makes the plan unsafe, name the conflict and stop.
