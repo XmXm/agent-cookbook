@@ -1,4 +1,6 @@
 .DS_Store
 /diagrams/
+/mt-skills/
+/refs/
 __pycache__/
 *.pyc

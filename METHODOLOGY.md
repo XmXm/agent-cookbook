@@ -12,10 +12,10 @@
 |---|---|---|---|
 | 哲学层 | 人 + nmem | 边界导向、长期主义、系统化思维 | nmem 决策记忆持续沉淀 |
 | 方法论层 | agent-cookbook（随人走，个人 GitHub） | 四门 + shared/ 公约 + knowledge preflight | RESOLVER 路由表 + verify-skills.sh 合同 + legacy 停车场 |
-| 项目绑定层 | mt-skills（公司 git，submodule） | cs-coding + kb-search 等 MT skill + project-routing.md | 依赖方向单向：MT 可引用通用，通用永不点名 MT |
+| 项目绑定层 | mt-skills（公司 git，嵌套仓） | cs-coding + kb-search 等 MT skill + project-routing.md | 依赖方向单向：MT 可引用通用，通用永不点名 MT |
 | 领域作战层 | mlbattle 四仓（随仓走） | bdt CLI → mlbattle-kb 知识服务 → battle-debug 引擎 → eval/case/pattern 治理 | 安全红线、evidence_strength 分级、process_log 契约、`bdt kb submit` 单写者 |
 | 协作层 | lark-* 全家桶 | 飞书作为工作 IO：单据进、交付出 | lark-cli `_notice` 自引导 |
-| 思想供给层 | refs/ 只读子模块 | Waza、ponytail、hai-stack、mattpocock、lark-skills | 三层复用纪律（见"剃"） |
+| 思想供给层 | refs/ 只读嵌套仓 | Waza、ponytail、hai-stack、mattpocock、lark-skills | 三层复用纪律（见"剃"） |
 
 两级 skills 的咬合：用户级是方法论与工具箱，项目级是作战流水线，
 通过同名特化 override（kb-search）、双向负边界声明（cs-coding ↔ check ↔
@@ -79,7 +79,7 @@ battle-debug ↔ p4-review）、上下游数据（lark-proj 读单是 bug corpus
   references（跨技能共享一律走 shared）。
 - **持久化契约**：.plans/ 三件套按 `shared/plan-artifacts.md`；
   plan 创建、check Plan Execution 滚动更新 progress、plan Review 验收。
-- **提交纪律**：mt-skills 先 commit/push，父仓再更新 submodule 指针；
+- **提交纪律**：mt-skills 在自己仓内 commit/push（父仓 gitignore，不追踪指针）；
   不被要求不提交。
 - **refs/ 只读**：只经脚本移指针，不为上游瑕疵买单。
 

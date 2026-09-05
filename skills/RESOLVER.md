@@ -85,7 +85,7 @@ Each covers one phase of a task; they do not chain automatically.
 | Trigger | Skill |
 |---|---|
 | Open or summarize diffs in Beyond Compare from Git, P4, SVN, unified diff text, or explicit left/right paths | `skills/bcompare-diff/SKILL.md` |
-| Full git sync pipeline ("git-sync", "同步主仓和子仓", "commitall"): commit submodule + parent work, pull with rebase, refresh third-party ref submodules, commit pointer bumps, push submodules before parent — editors always disabled | project-level `.claude/skills/git-sync` (this repo only) |
+| Full git sync pipeline ("git-sync", "同步主仓和子仓", "commitall"): commit nested-repo (mt-skills) + parent work, pull with rebase, refresh third-party ref clones via update-refs, push — editors always disabled | project-level `.claude/skills/git-sync` (this repo only) |
 
 ## Legacy
 
@@ -106,7 +106,7 @@ now covers the same need:
 | `legacy/planning-split/SKILL.md` | `skills/plan/SKILL.md` |
 | `legacy/commitall/SKILL.md` | project-level `.claude/skills/git-sync` ("只提交" partial run) |
 | `legacy/git-remote-sync/SKILL.md` | project-level `.claude/skills/git-sync` (full pipeline) |
-| `legacy/git-sync/SKILL.md` (v1, user-level Commit/Sync modes) | project-level `.claude/skills/git-sync` (fixed five-step pipeline incl. third-party submodule refresh; repo-local, not distributed via `~/.agents`) |
+| `legacy/git-sync/SKILL.md` (v1, user-level Commit/Sync modes) | project-level `.claude/skills/git-sync` (fixed four-step pipeline incl. third-party clone refresh; repo-local, not distributed via `~/.agents`) |
 | `refs/Waza/skills/think` (upstream, unlinked) | `skills/plan/SKILL.md` (think skeleton internalized; Lightweight/Triage/attack angles ported) |
 | `legacy/pc-wsl/SKILL.md` (ex `pc-wsl-docker`) | none — parked; its broad SSH/remote-machine triggers over-matched. Revive from `legacy/` if the PC/WSL workflow returns |
 

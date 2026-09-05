@@ -28,11 +28,11 @@ agent-cookbook/
 │                     #   + project-routing.md mount (symlink into mt-skills)
 ├── METHODOLOGY.md    # 门·证·环·剃 — the personal methodology, lives with the person
 ├── candidates/       # skill drafts pending the promotion gate (eval → skills/ + RESOLVER)
-├── mt-skills/        # MT-ONLY skill layer (submodule on company git)
+├── mt-skills/        # MT-ONLY skill layer (nested repo on company git; gitignored by parent)
 │   ├── skills/       # cs-coding + kb-search + lark-proj + lark-story-closeout + bcompare-diff
 │   └── shared/       # project-routing.md (binds doors to MT skills) + workspace-facts.md
-├── refs/             # third-party repos as git submodules (read-only references)
-├── scripts/          # verify-skills.sh (contract checker), update-submodules.sh
+├── refs/             # third-party repos as nested clones (read-only references; gitignored)
+├── scripts/          # verify-skills.sh (contract checker), update-refs.sh
 └── legacy/           # parked skills and retired rules
     └── rules/        # retired always-on rule files (content folded into shared/ and skills)
 ```
@@ -50,11 +50,13 @@ Ownership and the layer rule:
   skills only through the `shared/project-routing.md` mount).
 - `skills/`, `shared/`, `scripts/`, `legacy/` — the user's own / reused
   content. Edit freely.
-- `mt-skills/` — MT-only submodule. Edit here when changing MT skills, then
-  commit and push inside `mt-skills/` before committing the parent repo pointer.
-- `refs/` — **third-party submodules**. Do not hand-edit; they are upstream code
-  pulled in for reference and for symlink targets. Treat `refs/` as read-only;
-  only update it by moving submodule pointers via the script below.
+- `mt-skills/` — MT-only nested repo (gitignored by the parent). Edit here when
+  changing MT skills, then commit and push inside `mt-skills/` itself; the
+  parent repo does not track it.
+- `refs/` — **third-party nested clones** (gitignored by the parent). Do not
+  hand-edit; they are upstream code pulled in for reference and for symlink
+  targets. Treat `refs/` as read-only; only update them by pulling via the
+  script below.
 
 ## Front Doors
 
@@ -100,8 +102,8 @@ Maintenance cadence:
 | Trigger | Action |
 |---|---|
 | Skill or RESOLVER change | `bash scripts/verify-skills.sh` (see Validation) |
-| mt-skills change | Commit/push submodule first, then parent pointer (see Submodules) |
-| `update-submodules.sh` run | Skim upstream deltas (esp. Waza); distill worthwhile ideas into own skills, do not re-link |
+| mt-skills change | Commit/push inside `mt-skills/` (see Nested repos) |
+| `update-refs.sh` run | Skim upstream deltas (esp. Waza); distill worthwhile ideas into own skills, do not re-link |
 | Monthly | Run `/skill-usage-report`: stats vs baseline, miss/misfire sampling, monthly report into nmem |
 | Pillar-level decision lands | Sync `METHODOLOGY.md` — decision-driven, never calendar-driven |
 | New skill proposed | Deletion test + Codex 2% context budget check first |
@@ -115,7 +117,7 @@ A skill is a directory under `skills/` containing `SKILL.md` (plus optional
   `markdown-to-lark-doc`, `nmem-save`, …).
 - **Symlinked skills** — symlinks into `mt-skills/` for MT skills (cs-coding,
   kb-search, lark-proj, lark-story-closeout, bcompare-diff), or into `refs/`
-  submodules for upstream skills (`ui`, `write` → `refs/Waza`; `lark-*` →
+  clones for upstream skills (`ui`, `write` → `refs/Waza`; `lark-*` →
   `refs/lark-skills`).
 
 ### SKILL.md contract (enforced by `scripts/verify-skills.sh`)
@@ -143,24 +145,27 @@ A skill is a directory under `skills/` containing `SKILL.md` (plus optional
 (cs-coding, write-document). The `~/.claude/rules` symlink has been removed.
 See `legacy/rules/README.md` for the full mapping.
 
-## Submodules
+## Nested repos
 
-`mt-skills/` is a user-owned MT-only submodule (company git), not a
-third-party reference. It may be edited directly, subject to the red lines
-above. When it changes, commit and push `mt-skills/` first, then commit the
-parent repo's submodule pointer update.
+`mt-skills/` and everything under `refs/` are **plain nested git clones**,
+gitignored by the parent — not submodules. Each has its own remote and
+history; the parent repo tracks nothing about them.
 
-### Third-party submodules (`refs/`)
+`mt-skills/` is user-owned (company git), not a third-party reference. It may
+be edited directly, subject to the red lines above. When it changes, commit
+and push inside `mt-skills/` itself — there is no parent pointer to update.
 
-Third-party repos pinned as submodules (`Waza`, `mattpocock-skills`,
-`lark-skills`, `hai-stack`, `ponytail`). Update with:
+### Third-party clones (`refs/`)
+
+Third-party repos as read-only clones (`Waza`, `mattpocock-skills`,
+`lark-skills`, `hai-stack`, `ponytail`). Bootstrap and update with:
 
 ```bash
-scripts/update-submodules.sh   # git submodule update --remote --merge
+scripts/update-refs.sh   # clone if missing, else fast-forward pull
 ```
 
-After cloning, init submodules so symlinked skills resolve:
-`git submodule update --init --recursive`.
+After cloning the parent repo on a fresh machine, run the same script so
+symlinked skills resolve.
 
 ## Validation
 
@@ -173,10 +178,12 @@ bash scripts/verify-skills.sh
 It validates the SKILL.md contract, legacy parking, RESOLVER coverage, link
 integrity, and table formatting across all active skills.
 
-> Known false positive: the link checker flags `![Image](img_xxx)`, a doc
-> example inside the read-only `refs/lark-skills` submodule
-> (`skills/lark-im/references/lark-im-chat-messages-list.md`). It is upstream
-> content, not a routing or own-skill problem.
+> Known false positives (upstream content inside the read-only
+> `refs/lark-skills` clone, not routing or own-skill problems):
+> the link checker flags `![Image](img_xxx)`, a doc example in
+> `skills/lark-im/references/lark-im-chat-messages-list.md`, and
+> `scripts/lark_` from the glob `scripts/lark_*.py` in
+> `skills/lark-sheets/SKILL.md`.
 
 ## Conventions
 
