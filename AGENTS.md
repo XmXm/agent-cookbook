@@ -176,14 +176,9 @@ bash scripts/verify-skills.sh
 ```
 
 It validates the SKILL.md contract, legacy parking, RESOLVER coverage, link
-integrity, and table formatting across all active skills.
-
-> Known false positives (upstream content inside the read-only
-> `refs/lark-skills` clone, not routing or own-skill problems):
-> the link checker flags `![Image](img_xxx)`, a doc example in
-> `skills/lark-im/references/lark-im-chat-messages-list.md`, and
-> `scripts/lark_` from the glob `scripts/lark_*.py` in
-> `skills/lark-sheets/SKILL.md`.
+integrity, and table formatting across all active skills. Upstream content
+under `refs/lark-skills` (glob references such as `scripts/lark_*.py`,
+`img_xxx` placeholders, table pipes) is skipped by the script itself.
 
 ## Conventions
 
