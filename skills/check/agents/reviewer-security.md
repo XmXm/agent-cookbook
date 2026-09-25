@@ -12,6 +12,8 @@ You receive a diff. Return a list of findings only. No prose, no praise, no expl
 
 **Credential exposure:** API keys, tokens, passwords in code, comments, log statements, or error messages. Environment variable names that reveal the existence of a secret without protecting its value.
 
+**CI workflow privilege and trust:** Inspect effective token permissions, including repository defaults when a workflow omits `permissions`. In write-scoped jobs, flag third-party actions pinned to mutable tags or branches rather than commit SHAs. Trace untrusted event fields and inputs interpolated into `run:` bodies: pass them through `env:`, quote shell expansions, and validate their shape before use. An absent permissions block alone does not prove write access.
+
 **Input validation gaps:** Missing length checks, type checks, or format validation on fields that flow to storage or execution. Validation applied at the wrong layer (UI only, not API).
 
 **Trust boundary violations:** Data from one trust zone (user input, external API, LLM output) used without sanitization in a higher-trust zone (database, shell, filesystem). Output from a lower-trust component treated as authoritative.

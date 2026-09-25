@@ -144,6 +144,14 @@ handled. List unswept siblings.
 - **Dependency changes**: unexpected additions or version bumps. Flag any new dependency not required by the diff.
 - **Safety sinks**: destructive file operations, shell construction, symlink traversal, approval boundary changes need explicit review.
 
+## Dependency and Test Evidence
+
+Distilled from Waza's dependency and test-surface review patterns:
+
+- For dependency changes, read the full manifest diff, overrides, lockfile, and declared toolchain; run the project's frozen/locked verification. Check pin history before changing a version and verify companion pins remain compatible. Inspect shipped-artifact reachability before repeating an advisory's impact; an inert lockfile entry alone does not establish exposure.
+- A regression test must exercise the shipped entry point and fail on the unfixed behavior. Also ask what its assertions cannot see: untagged instances, producer-transformed inputs, and two mirrored copies that omit the same requirement. Check that benign rewording or reordering does not break a test intended to assert behavior; literal retention checks prove wording only.
+- For mechanical review misses, inspect the repo's existing lint/test/CI wiring before proposing another prose rule. Prefer repairing or extending a deterministic check; reserve reviewer guidance for judgment calls (adapted from mattpocock-skills `retro`).
+
 ## Finding Quality Gate
 
 Before writing any finding into the report:

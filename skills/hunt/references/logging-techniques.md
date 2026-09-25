@@ -70,3 +70,14 @@ After the root cause is confirmed:
 1. Remove all temporary logs.
 2. If a log is genuinely useful in production, move it behind the project's debug flag or logger level.
 3. Do not leave `console.log`, `print`, or `fmt.Println` in shipped code paths unless the project keeps debug instrumentation there.
+
+## Native App Freeze Evidence
+
+Adapted from Waza's native-freeze guidance. For beachballs, first-open lag,
+tab-switch freezes, or sleep/wake stalls, capture evidence while frozen before
+changing code:
+
+- Record the exact transition, cold versus warm launch, idle duration, app version, permissions, and display setup.
+- On macOS, use `sample <pid>` alongside recent logs, CPU/memory, and thread count; on other platforms use the native thread profiler. Determine whether the main thread is blocked, spinning, or allocating.
+- Trace first-frame tasks and notification/wake callbacks for synchronous filesystem scans, icon/metadata lookup, and parent-path walks. Check overlay teardown on Escape, deactivation, permission denial, and window close, plus timers that survive hidden windows or sleep.
+- After the fix, repeat the runtime path and search sibling uses of the same API shape. Report the captured stack/state transition, regression guard, and siblings fixed or left safe. A compile-only check does not establish that the freeze is resolved.

@@ -28,6 +28,15 @@ A focused subset of full-review hard stops, enough to catch irreversible harm at
 
 Run the project's verification command this session and paste the output. If none exists, document `verification: none -- no command available` as a structural gap, not a pass. For a bug fix, a regression test that fails on the old code must exist before acceptance.
 
+Guard against false greens (distilled from hai-stack's technical acceptance method):
+check that the required cases actually ran, keep skipped cases out of the pass
+count, and mark unavailable dependencies as **blocked**, not passed. Static
+inspection proves an implementation path exists, not that runtime requirements
+work. Distinguish **partial**, **failed**, and **not run** evidence rather than
+collapsing them into a successful command exit. For stateful acceptance, use
+disposable fixtures and check persisted invariants after the scenario, not only
+the response; a stale developer database is not a clean-install test.
+
 ## Finding quality
 
 Every reported finding cites file:line, the specific trigger, and why existing guards do not already prevent it. A clean acceptance is a valid acceptance; do not manufacture findings. When the diff and scope are larger than acceptance can responsibly cover, escalate to a full code review.
