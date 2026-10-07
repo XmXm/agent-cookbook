@@ -65,10 +65,10 @@ coding guide (symlinked from `mt-skills/`):
 
 | Door | What it does |
 |---|---|
-| `plan` | Design, evaluate, refactor-plan, grill, acceptance. Produces the plan; does not implement code. |
+| `plan` | Design, evaluate, refactor-plan, grill, acceptance, detached check (交接检查). Produces the plan; does not implement code. |
 | `check` | Code review, plan execution, release follow-through, project audit. User-invoked only (`/check` or an explicit "review 一下"); never auto-triggered. |
 | `hunt` | Root-cause diagnosis for errors, regressions, broken behavior. |
-| `write-document` | Structured document creation (README, design doc, postmortem, weekly report, KB knowledge, Feishu delivery). |
+| `write-document` | Documents and prose: create, rewrite, polish, review, remove AI tone (design doc, weekly report, postmortem, README, KB, release notes, Feishu delivery). |
 | `cs-coding` | C# authoring guide for MLBB battle core — read before writing. |
 
 Each door embeds a knowledge preflight (nmem + project KB) and project routing
@@ -117,7 +117,7 @@ A skill is a directory under `skills/` containing `SKILL.md` (plus optional
   `markdown-to-lark-doc`, `nmem-save`, …).
 - **Symlinked skills** — symlinks into `mt-skills/` for MT skills (cs-coding,
   kb-search, lark-proj, lark-story-closeout, bcompare-diff), or into `refs/`
-  clones for upstream skills (`ui`, `write` → `refs/Waza`; `lark-*` →
+  clones for upstream skills (`ui` → `refs/Waza`; `lark-*` →
   `refs/lark-skills`).
 
 ### SKILL.md contract (enforced by `scripts/verify-skills.sh`)

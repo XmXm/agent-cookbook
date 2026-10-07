@@ -1,8 +1,8 @@
 ---
 name: plan
-description: "Take a position before any code: a quick 2-3 sentence stance on a small well-defined change (Lightweight), or a decision-complete plan — design and tradeoffs, opening the frame (格局, recommend the right target) vs grounding an over-ambitious idea (苟, a minimal verifiable first move), value judgment (Kill/Keep/Pivot) with multi-item triage, refactor planning, plan stress-testing, deep-module and domain vocabulary, lightweight acceptance against the approved plan, and persisting plans when asked (defaults to .plans/). A self-contained front door for code work; it decides and records the decision, it does not implement, debug, or review code."
-when_to_use: "出方案, 给方案, 怎么设计, 用什么方案, 怎么弄合适, 哪种方式好, 快速判断怎么改, 判断一下, 值不值得, 要不要做, 有没有必要, 看看这几个需求, 重构怎么改, 重构方案, 帮我拷问这个计划, 验收一下, 打开格局, 格局太小, 站高一点, 别太保守, 太飘, 太理想化, 怎么落地, 先落地, 收一收, 苟一下, plan this, how should I design, what's the best approach, quick take, refactor plan, is this worth it, grill this plan, did we build what was asked, think bigger, make this real, what do I do first"
-dispatch_intent: "New feature design, architecture, value judgment, refactor planning, plan stress-test, acceptance against an approved plan"
+description: "Take a position before any code: a quick 2-3 sentence stance on a small well-defined change (Lightweight), or a decision-complete plan — design and tradeoffs, opening the frame (格局, recommend the right target) vs grounding an over-ambitious idea (苟, a minimal verifiable first move), value judgment (Kill/Keep/Pivot) with multi-item triage, refactor planning, plan stress-testing, deep-module and domain vocabulary, lightweight acceptance against the approved plan, persisting plans when asked (defaults to .plans/), and detached checks (交接检查) that make a persisted plan executable by a fresh session. A self-contained front door for code work; it decides and records the decision, it does not implement, debug, or review code."
+when_to_use: "出方案, 给方案, 怎么设计, 用什么方案, 怎么弄合适, 哪种方式好, 快速判断怎么改, 判断一下, 值不值得, 要不要做, 有没有必要, 看看这几个需求, 重构怎么改, 重构方案, 帮我拷问这个计划, 验收一下, 这个计划脱离 session 能否执行, 计划交接给别的会话, 给计划补充交接信息, 计划交接检查, 打开格局, 格局太小, 站高一点, 别太保守, 太飘, 太理想化, 怎么落地, 先落地, 收一收, 苟一下, plan this, how should I design, what's the best approach, quick take, refactor plan, is this worth it, grill this plan, did we build what was asked, can a fresh session execute this plan, handoff check for this plan, think bigger, make this real, what do I do first"
+dispatch_intent: "New feature design, architecture, value judgment, refactor planning, plan stress-test, acceptance against an approved plan, detached check of a persisted plan"
 allowed-tools: "Read, Grep, Glob, Bash, WebFetch, WebSearch, Edit, Write"
 ---
 
@@ -67,6 +67,10 @@ When the grill invalidates part of the plan, fold the fix in by rewriting the af
 
 For "did we build what was asked / 验收一下" after implementation. May: compare the diff against the approved plan and label **on target / drift / incomplete**, run the project's verification command, and check the hard-stop subset in [references/review-gate.md](references/review-gate.md). Must not: substitute for a full diff/release review. Heavy diff review, release gates, and project audits are out of scope for this mode.
 
+### Detached check (交接检查)
+
+For "can a fresh session execute this plan / 这个计划脱离 session 能否执行 / 计划交接给别的会话 / 给计划补充交接信息" asks, and automatically (at reduced depth) when a persisted plan will be executed by a session that did not plan it; workers dispatched and accepted within the planning session are not detached. If an approved plan exists only in the conversation, persist it first; with no approved plan at all, say the mode does not apply and suggest the user run `/handoff` (session-level, user-invoked). May: read the plan directory and repo, sweep for leaked context and claims an implementer would stop on, ask the user the decisions only they can make, run the cold-start pass at the depth the trigger allows, and rewrite the plan in place. Must not: implement code, dump the conversation into the plan, or present an author re-read as a cold-start simulation. Procedure, depth, and stop rule: [references/detached-handoff.md](references/detached-handoff.md).
+
 ## Persist the Plan
 
 The persistence contract lives in `shared/plan-artifacts.md`: when a plan file
@@ -76,10 +80,12 @@ In short: persist only when the user's words call for a plan file — an explici
 ask, a named target directory, or a stated cross-session / detached execution.
 Absent that intent the plan stays in the conversation regardless of size;
 the file is a carrier for the decision, never the goal. When a persisted plan
-came from fan-out research or will be executed outside this session, also persist the
-full research reports to `research/` and write the Execution Playbook section
-(orchestration discipline, copy-pasteable gates, context entry points), then
-run the detached-execution self-check in [references/handoff.md](references/handoff.md).
+came from fan-out research, persist the full research reports to `research/`.
+When it will be executed by a session that did not plan it, also write the
+Execution Playbook section (orchestration discipline, copy-pasteable gates,
+context entry points) and run the Detached check at the depth its trigger
+allows ([references/detached-handoff.md](references/detached-handoff.md)) before
+declaring the plan ready.
 During execution, `/check` Plan Execution updates `progress.md` against the
 same contract; Review mode reads it back for acceptance.
 
@@ -125,6 +131,7 @@ out of scope, state so and proceed — preflight is non-blocking.
 | Parallel session switched the main checkout to its feature branch; another session's `merge into dev` landed on that branch instead | Baseline branch is immovable; feature branches are checked out only inside worktrees |
 | Single-track plan spawned a worktree + branch for no concurrency | Worktrees only for true parallelism; otherwise develop directly on the current branch |
 | Review found a plan flaw; the fix was appended as a new phase / revision note | Unimplemented content is rewritten in place — the plan always reads as the current best plan, git carries the history |
+| A persisted plan passed the author's own "could a fresh session start?" re-read, yet fresh agents per phase found dozens of gaps (test machines and access, paid-run authorization, cross-phase frozen fields, session-only paths) | Run the Detached check; only the per-phase cold-start simulation counts as verified, and it runs at most two rounds |
 
 ## Output
 
@@ -139,5 +146,7 @@ out of scope, state so and proceed — preflight is non-blocking.
 **Lightweight:** 2-3 sentences — what changes, where, why — plus the brute-force default and one risk. No template.
 
 **Evaluate:** one `Kill` / `Keep` / `Pivot` verdict + three reasons. No options list.
+
+**Detached check:** the tier that ran (self-checked or cold-start verified), a can-start verdict per phase, the user decisions collected, and each gap fixed with the section it went into; the plan files are updated in place.
 
 After approval, stop. Persist the plan to a directory only when the user's words call for it (see Persist the Plan); otherwise the plan stays in the conversation. Implementation starts when the user says so; afterward, use Review mode for acceptance.

@@ -13,10 +13,10 @@ Each covers one phase of a task; they do not chain automatically.
 
 | Trigger | Skill |
 |---|---|
-| Rough idea, architecture, value judgment, refactor plan, plan stress-test, acceptance | `skills/plan/SKILL.md` |
+| Rough idea, architecture, value judgment, refactor plan, plan stress-test, acceptance, detached check (交接检查) of a persisted plan | `skills/plan/SKILL.md` |
 | User explicitly invokes `/check` or asks for a code review ("review 一下"); other modes (plan execution, release gate, project audit) only via `/check`; never auto-triggered | `skills/check/SKILL.md` |
 | Error, crash, regression, failing test, broken behavior, screenshot-reported defect | `skills/hunt/SKILL.md` |
-| Structured document creation: README, design doc, postmortem, weekly report, KB knowledge, Feishu delivery | `skills/write-document/SKILL.md` |
+| Documents and prose: create, rewrite, polish, review, remove AI tone (design doc, weekly report, postmortem, README, runbook, KB, release notes, social copy) | `skills/write-document/SKILL.md` |
 
 ### Coding Guides
 
@@ -43,14 +43,13 @@ Each covers one phase of a task; they do not chain automatically.
 |---|---|
 | Search the battle knowledge base for patterns, cases, config relations, postmortems | `skills/kb-search/SKILL.md` |
 | Saving memories to nmem (m add / 写回 nmem / 记到记忆 / remember this): search-first dedupe, update/supersede/deprecate routing, unit-type and importance grading, no spaces | `skills/nmem-save/SKILL.md` |
-| Compress the current session into a handoff doc for a fresh session (session-level; task-level tracking lives in plan's `.plans/`) | `skills/handoff/SKILL.md` |
+| Compress the current session into a handoff doc for a fresh session (session-level; making a persisted plan executable by a fresh session is plan's Detached check) | `skills/handoff/SKILL.md` |
 | Monthly skill usage observation: transcript stats, miss/misfire sampling, nmem monthly report writeback | `skills/skill-usage-report/SKILL.md` |
 
 ### Content And Web
 
 | Trigger | Skill |
 |---|---|
-| Writing, editing prose, release notes, bilingual polish, remove AI tone | `skills/write/SKILL.md` |
 | Push a local Markdown file to Notion | `skills/notion-md-sync/SKILL.md` |
 | Open/read/summarize a URL, web search, research, clip an article | `skills/webforage/SKILL.md` |
 
@@ -116,5 +115,5 @@ now covers the same need:
 - When several skills match, choose the most specific workflow.
 - `check` is user-invoked only: `/check` or an explicit code review request ("review 一下"). Never enter it from commit/push, release, or "按计划实施" wording. For broken behavior, use `hunt`.
 - For UI taste and composition work, use `ui` (upstream Waza renamed `design` → `ui` at df08298 to stop shadowing Claude Code's built-in `/design`); for UI regressions, use `hunt`.
-- `write-document` creates structured documents; `write` polishes/rewrites prose and removes AI tone. They do not overlap.
+- `write-document` owns the whole writing door: creating, rewriting, polishing, and reviewing documents and prose. There is no separate polish skill.
 - `plan` produces the plan; implementation happens directly, or through `check` Plan Execution mode when the user invokes `/check`. `plan` does not write code.

@@ -30,20 +30,14 @@ If an attack holds, deform the design to survive it. If it shatters the approach
 
 Either of the first two means the work is not staged; ship it as one phase instead of pretending it is staged. The third means the plan is not ready.
 
-## Detached-execution self-check
+## Detached check (交接检查)
 
 When the plan will be executed outside the current session (a fresh session, or
-parallel worker agents), run one more check before declaring the persisted plan
-done: *could a new session, reading only the plan directory plus the repo-level
-docs, start Phase 1 without asking anything the planning session already knew?*
-Common leaks to look for:
-
-- Research detail that exists only in this session's agent transcripts — persist
-  full reports to `research/` (contract in `shared/plan-artifacts.md`).
-- Operating procedure learned during planning (orchestration discipline, gate
-  commands, per-worker constraints) — write the Execution Playbook section.
-- Decisions recorded only in conversation or a memory store — name the memory
-  keywords in the playbook's context entry-point list so they can be recovered.
+parallel worker agents), the question is: *could a new session, reading only
+the plan directory plus the repo-level docs, start every phase without asking
+anything the planning session already knew?* The author cannot answer that by
+re-reading. Run the Detached check, which covers the sweep, the decision harvest, and
+the cold-start pass at the depth its trigger allows: [detached-handoff.md](detached-handoff.md).
 
 ## Handoff contents
 
@@ -60,7 +54,10 @@ When the user asks to export a handoff, or the environment prevents further exec
 
 When the user approves the plan and says "implement" / "可以干" / "按计划实施",
 implement directly, working through the plan phases as a to-do list and verifying
-each. If the user invokes `/check`, its Plan Execution mode owns that loop and
+each. When `progress.md` has a phase handoff table, confirm the rows of the
+phases this phase depends on (per the Playbook's orchestration section, else the
+preceding phase) are filled before starting it; an empty row is drift, so name it
+and stop. Fill the phase's own row when it merges. If the user invokes `/check`, its Plan Execution mode owns that loop and
 transitions to Ship when done; do not enter `check` on your own. `plan` itself
 does not implement code.
 

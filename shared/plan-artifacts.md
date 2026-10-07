@@ -35,7 +35,7 @@ printf ".plans/%03d-%s/\n" "$(( ${NEXT:-0} + 1 ))" "<slug>"
 | `task_plan.md` | Line after the title must be a one-line `状态：<current state>` status header (see below). Then the design header (Goal, Building / Not Building, Approach, Key Decisions, Premise Collapse, External Dependencies, Verification Plan, Rollback) followed by phases, each with a concrete verification command; plus an optional Execution Playbook section (see below) | `plan`, at approval; revisions rewrite affected sections in place (see Revision discipline); anyone who changes the plan's state updates the header |
 | `findings.md` | Research evidence and state snapshots; only when the work is research-heavy | `plan`; executors may append corrections |
 | `research/<topic>.md` | Optional. Full research reports (one file per investigation topic), preserving the complete file:line evidence, call trees, and comparison tables that `findings.md` had to condense away | `plan`, at approval, when research came from fan-out agents |
-| `progress.md` | Phase status as a rolling summary; only when execution spans sessions or is long-running | `plan` seeds it when warranted; `/check` Plan Execution updates it as phases complete |
+| `progress.md` | Phase status as a rolling summary, plus the phase handoff table for detached multi-phase plans; only when execution spans sessions or is long-running | `plan` seeds it when warranted; `/check` Plan Execution updates it as phases complete and fills the phase's handoff row at merge |
 
 ### The status header — the only aggregation mechanism
 
@@ -90,7 +90,11 @@ when findings alone carries all the evidence without loss.
 A plan that will be executed in a fresh session, or by parallel worker agents,
 needs more than decisions — it needs the *operating procedure* that the planning
 session learned. Add an `## Execution Playbook` section to `task_plan.md` when
-execution is expected to span sessions or fan out across agents. Include:
+the plan will be executed by a session that did not plan it (workers
+dispatched and accepted within the planning session do not count). Branch
+discipline, the verification gate, and the context entry points are always
+present; include each other item only when it applies, and omit it rather than
+writing N/A:
 
 - Branch discipline (always state it explicitly): the main checkout never
   leaves the baseline branch (e.g. `dev`) — feature branches are checked out
@@ -106,9 +110,44 @@ execution is expected to span sessions or fan out across agents. Include:
 - Per-worker hard constraints (files that must never be touched, add/commit
   discipline, style boundaries).
 - A context entry-point list: which files a fresh session must read, and any
-  memory-store keywords that recover prior decisions.
+  memory-store keywords for background. Any decision a phase needs is written
+  in the plan itself; memory is never its only source.
+- Baseline commit(s), and the rule that `file:line` references are relocated
+  by symbol, with any known drift.
+- External dependencies and access: every environment, host, account, CLI,
+  and service the phases need, what each is used for, whether it shares
+  state with production, how to reach it, and a read-only preflight for it.
+- Integration isolation: how local or end-to-end testing avoids touching
+  production state (credentials, config dirs, ports, databases, registered
+  clients or devices), and how to clean up afterwards.
+- Authorization rules for costly or outward actions (paid calls, remote
+  logins, tool upgrades): a pre-authorized budget, or "confirm before each run".
+- Evidence regeneration: commands that rebuild any generated evidence the
+  research cites (schemas, type bindings), with tool versions.
+- Release checklist and rollback reality: cross-repo deploy order, how users
+  turn the feature on and off, one-way schema changes, and the
+  stop-the-bleeding lever.
 
-Skip it for plans the current session will finish itself.
+Plans handed to a fresh session go through the `plan` skill's Detached check
+(`skills/plan/references/detached-handoff.md`) before being declared ready.
+
+Skip the Playbook for plans the current session will finish itself.
+
+### Phase handoff table — what the next phase needs to know
+
+Only for detached plans with two or more phases; skip it otherwise. Such a plan seeds a table in `progress.md`, one row per phase,
+listing the facts only that phase can establish and the next phase must
+consume. The row is filled when the phase merges and checked before any phase
+that depends on it starts. Keep entries factual and short (commit hashes, measured values,
+chosen fallbacks, file or table names); the table is exempt from the
+rolling-summary fold because it is the handoff itself.
+
+```text
+| 阶段 | 必填内容 | 结论 |
+|---|---|---|
+| 1 | 合并 commit；实测版本与限值；阶段内选定的降级路径 | 未开始 |
+| 2 | 合并 commit；新增入口文件与签名；数据结构版本 | 未开始 |
+```
 
 The persisted plan carries the same hard rules as the conversation plan: no
 `TBD` / `TODO`, every phase independently mergeable. Write in the session
