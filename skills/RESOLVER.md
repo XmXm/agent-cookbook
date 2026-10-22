@@ -57,25 +57,10 @@ Each covers one phase of a task; they do not chain automatically.
 
 | Trigger | Skill |
 |---|---|
-| First-time lark-cli setup, auth login, identity switch, scope errors | `skills/lark-shared/SKILL.md` |
-| Resolve a name/email to open_id, or look up a person by open_id | `skills/lark-contact/SKILL.md` |
+| Feishu / Lark general CLI operations: Docx / Wiki / Drive / Sheets / Base (Bitable) / Slides / Whiteboard / IM messages & group chats / Contact lookup / Calendar / Meeting & Minutes / Task / Approval / Mail / OKR / Attendance / native Markdown / Miaoda Apps / Event stream / auth & config / raw OpenAPI | `skills/lark-cli/SKILL.md` |
 | Look up P2P chat history with a specific person | `skills/finding-lark-chat-history/SKILL.md` |
-| Send/reply messages, manage group chats, up/download chat files | `skills/lark-im/SKILL.md` |
-| Real-time event listening/subscribing (NDJSON stream) | `skills/lark-event/SKILL.md` |
-| Read/edit Feishu Docx / Wiki documents | `skills/lark-doc/SKILL.md` |
-| Create/operate Feishu spreadsheets (Sheets) | `skills/lark-sheets/SKILL.md` |
-| Operate Feishu Bitable (多维表格 / Base) | `skills/lark-base/SKILL.md` |
-| Create/edit Feishu slides | `skills/lark-slides/SKILL.md` |
-| Query/edit Feishu whiteboards (画板) | `skills/lark-whiteboard/SKILL.md` |
-| Manage Feishu tasks, lists, and task agents | `skills/lark-task/SKILL.md` |
-| Feishu approvals: query and act on approval tasks | `skills/lark-approval/SKILL.md` |
-| Manage calendar events and meeting rooms | `skills/lark-calendar/SKILL.md` |
-| Search/operate/generate Minutes (妙记) | `skills/lark-minutes/SKILL.md` |
-| View/create/edit/compare Feishu Markdown files | `skills/lark-markdown/SKILL.md` |
 | Import a whole local `.md` into a Feishu doc (mermaid → 画板) | `skills/markdown-to-lark-doc/SKILL.md` |
 | Draw architecture diagrams as editable Lark whiteboard (画板) nodes | `skills/architecture-to-lark-whiteboard/SKILL.md` |
-| Find/call raw Feishu OpenAPI not wrapped by a CLI command | `skills/lark-openapi-explorer/SKILL.md` |
-| Build a custom lark-cli skill | `skills/lark-skill-maker/SKILL.md` |
 | Read/fetch Feishu Project (Meego) bug/story work items | `skills/lark-proj/SKILL.md` |
 | Generate/publish story closeout comments, finish owned nodes | `skills/lark-story-closeout/SKILL.md` |
 

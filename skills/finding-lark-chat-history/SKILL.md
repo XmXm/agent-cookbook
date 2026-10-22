@@ -9,7 +9,7 @@ Find recent Lark/Feishu direct-message history with a person from a human input 
 
 ## Required related skills
 
-Load these first when available:
+Load [`lark-cli`](../lark-cli/SKILL.md) rules first when needed (or read embedded sub-skills via `lark-cli skills read <name>`):
 
 - `lark-shared` — authentication, scope handling, update notices, and safety rules.
 - `lark-contact` — resolving names/account IDs to `open_id` and `p2p_chat_id`.

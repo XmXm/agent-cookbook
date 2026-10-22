@@ -120,7 +120,7 @@ Fact fidelity:
    conventions and prior examples; the project KB per `shared/project-routing.md`
    when mounted and in Scope. Find the project glossary and style guide (chapter 10
    of the style files); project conventions beat these rules. Read Feishu documents
-   with `/lark-doc` (WebFetch has no Feishu login). If a source is unavailable, say so
+   with `/lark-cli` (`lark-doc` domain; WebFetch has no Feishu login). If a source is unavailable, say so
    and proceed.
 2. **Lock mode, type, audience, channel.** Infer the type from the request. Ask only
    when two types are plausible and a wrong pick is costly, or when an unclear
@@ -180,7 +180,7 @@ structure and wording. No routing table → write a plain markdown knowledge not
 ### Delivery Routes
 
 - Feishu: `/markdown-to-lark-doc` for whole-file import with mermaid → 画板;
-  `/lark-doc` for direct editing.
+  `/lark-cli` (`lark-doc` domain) for direct editing.
 - Notion: `/notion-md-sync`.
 - Project main doc: the main-doc skill declared in `shared/project-routing.md`
   (if mounted); otherwise a design doc in local markdown.

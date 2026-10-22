@@ -20,7 +20,7 @@ metadata:
 # architecture-to-lark-whiteboard
 
 把架构图画成**飞书画板里的原生可编辑节点**。心法一句话：
-**用 [architecture-diagram](../architecture-diagram/architecture-diagram/SKILL.md) 的设计系统，走 `lark-whiteboard` 的 SVG 路由，按 [lark-doc](../lark-doc/SKILL.md) 的资源块规则写进飞书。** 默认浅色配色（飞书文档是浅底，深色图嵌进去太重）；用户明确要暗色再切暗色。
+**用 [architecture-diagram](../architecture-diagram/architecture-diagram/SKILL.md) 的设计系统，走 `lark-whiteboard` 的 SVG 路由，按 [lark-cli](../lark-cli/SKILL.md)（`lark-doc` 子域）的资源块规则写进飞书。** 默认浅色配色（飞书文档是浅底，深色图嵌进去太重）；用户明确要暗色再切暗色。
 
 为什么需要单独一个 skill：`architecture-diagram` 产出的是自包含 HTML（内嵌 `<pattern>` 网格、`<filter>` 辉光、html2canvas 导出工具栏），这些**画板的 svg-parser 完全不支持**，直接塞进画板会渲染崩坏。本 skill 把那套设计语言**改造**到画板能吃下的 SVG 子集，并把配色调成**适配飞书浅色文档**，同时让节点保持可编辑。
 
@@ -156,7 +156,7 @@ npx -y @larksuite/whiteboard-cli@^0.2.11 -i "$DIR/diagram.svg" -o "$DIR/diagram.
 
 **场景 A：作为新画板块插入文档**（用户给了文档 URL，或要新建文档）
 
-把 SVG 包进 `<whiteboard type="svg">` 资源块，作为 XML 正文写入。**资源块的精确语法先读 [lark-doc 的 lark-doc-xml.md](../lark-doc/references/lark-doc-xml.md) 的「资源块」章节**；整体调度逻辑见 [lark-doc 的 lark-doc-whiteboard.md](../lark-doc/references/lark-doc-whiteboard.md)。
+把 SVG 包进 `<whiteboard type="svg">` 资源块，作为 XML 正文写入。**资源块的精确语法先通过 `lark-cli skills read lark-doc/references/lark-doc-xml.md` 阅读「资源块」章节**；整体调度逻辑见 `lark-cli skills read lark-doc/references/lark-doc-whiteboard.md`。
 
 ```bash
 cd "$DIR"                       # @file 必须相对当前目录
@@ -223,8 +223,6 @@ npx -y @larksuite/whiteboard-cli@^0.2.11 -i "$DIR/diagram.svg" -f svg --to opena
 ## 参考
 
 - [architecture-diagram](../architecture-diagram/architecture-diagram/SKILL.md) — 设计系统的源头（配色、排版、间距、图例规则）
-- [lark-doc 的 lark-doc-whiteboard.md](../lark-doc/references/lark-doc-whiteboard.md) — 文档里插画板的调度与 SVG 设计指南
-- [lark-doc 的 lark-doc-xml.md](../lark-doc/references/lark-doc-xml.md) — `<whiteboard type="svg">` 资源块精确语法
-- `lark-whiteboard` skill — SVG/DSL/Mermaid 路由、`--check` 渲染审查、`whiteboard +update` 写入、DSL 兜底
+- [lark-cli](../lark-cli/SKILL.md) — 飞书 CLI 统一入口（内嵌 `lark-cli skills read lark-doc/references/lark-doc-whiteboard.md`、`lark-cli skills read lark-doc/references/lark-doc-xml.md` 与 `lark-cli skills read lark-whiteboard`）
 - [resources/template.svg](resources/template.svg) — 画板安全的架构图起手模板（浅色，默认）
 - [resources/template-dark.svg](resources/template-dark.svg) — 暗色变体起手模板

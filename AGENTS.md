@@ -113,12 +113,12 @@ Maintenance cadence:
 A skill is a directory under `skills/` containing `SKILL.md` (plus optional
 `references/`, `agents/`, `scripts/` subdirs). Two kinds coexist:
 
-- **Own skills** — real directories (the four front doors,
+- **Own skills** — real directories (the four front doors, `lark-cli`,
   `markdown-to-lark-doc`, `nmem-save`, …).
 - **Symlinked skills** — symlinks into `mt-skills/` for MT skills (cs-coding,
   kb-search, lark-proj, lark-story-closeout, bcompare-diff), or into `refs/`
-  clones for upstream skills (`ui` → `refs/Waza`; `lark-*` →
-  `refs/lark-skills`).
+  clones for upstream skills (`ui` → `refs/Waza`; `handoff` →
+  `refs/mattpocock-skills`).
 
 ### SKILL.md contract (enforced by `scripts/verify-skills.sh`)
 
