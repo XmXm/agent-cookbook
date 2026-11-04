@@ -1,15 +1,7 @@
 ---
 name: check
-description: >-
-  Code review door: reviews diffs and PRs, executes an approved implementation plan
-  ("按计划实施"), runs a pre-ship or release gate, and performs a project-wide audit or
-  scorecard. User-invoked only: enter this skill when the user names it — "/check",
-  "用 check", "走 check", "check 一下" — or explicitly asks for a code review ("review
-  一下", "review this diff/PR", "帮我 review 代码"). Never trigger proactively from a
-  diff you happen to see, a commit or push, a completed task, or a plan that looks ready
-  to implement; handle those directly and mention that /check is available if a full
-  review would help. Route root-cause diagnosis to hunt and prose review to write.
-when_to_use: "/check, 用 check, 走 check, check 一下, 跑一下 check, review 一下, review this diff, review this PR, review my code, 帮我 review 代码, 用 check 按计划实施"
+description: "Code review door: review diffs/PRs, execute an approved plan, pre-ship/release gate, project audit. User-invoked only — enter when the user names it or explicitly asks for a code review; never trigger proactively from a diff, commit, push, finished task, or ready plan. Not for root cause (hunt) or prose review (write-document)."
+when_to_use: "/check, 用 check, check 一下, review 一下, 帮我 review 代码, review this diff/PR"
 dispatch_intent: "Explicit /check invocation or an explicit code review request; never inferred from commit/push, plan execution, release, or audit wording"
 ---
 

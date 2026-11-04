@@ -1,13 +1,7 @@
 ---
 name: write-document
-description: >-
-  Writes, rewrites, polishes, and reviews documents and prose: design docs, weekly reports,
-  postmortems, READMEs, runbooks, KB articles, release notes, social posts. Applies
-  one-reading wording rules to technical text, cuts AI tone everywhere, and names the
-  delivery route. Use when asked to write, draft, organize, polish, rewrite, review, or
-  de-AI a document or copy（写文档、写周报、写设计文档、改稿、润色、去 AI 味、审稿）.
-  Not for code comments or commit messages.
-when_to_use: "写文档, 出文档, 写设计文档, 写周报, 整理成周报, 写复盘, 写 postmortem, 写 README, 写 KB 知识, 写知识文档, 写 runbook, 文档骨架, 改稿, 润色, 去AI味, 去翻译腔, 写得干净点, 审稿, 文档review, 改技术文档, 发布说明, changelog, 回复 issue, 推特, 推文, 段落连贯, 本地化文案, write a design doc, weekly report, postmortem, knowledge article, draft a doc, polish, rewrite, proofread, edit text, clarify instructions, release notes, tweet"
+description: "Writes, rewrites, polishes, and reviews documents and prose (design doc, weekly report, postmortem, README, runbook, KB, release notes, social posts); cuts AI tone and names the delivery route. Not for code comments or commit messages."
+when_to_use: "写文档, 写周报, 写设计文档, 写复盘, 改稿, 润色, 去AI味, 审稿, 发布说明, 推文, write a doc, polish, rewrite, proofread"
 dispatch_intent: "Document creation, rewrite, polish, review; remove AI tone; technical wording; weekly report, design doc, postmortem, release notes, social copy"
 ---
 
@@ -181,7 +175,6 @@ structure and wording. No routing table → write a plain markdown knowledge not
 
 - Feishu: `/markdown-to-lark-doc` for whole-file import with mermaid → 画板;
   `/lark-cli` (`lark-doc` domain) for direct editing.
-- Notion: `/notion-md-sync`.
 - Project main doc: the main-doc skill declared in `shared/project-routing.md`
   (if mounted); otherwise a design doc in local markdown.
 

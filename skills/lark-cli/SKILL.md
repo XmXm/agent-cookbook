@@ -1,14 +1,10 @@
 ---
 name: lark-cli
 description: >-
-  飞书 / Lark 官方 CLI（lark-cli）统一入口：覆盖云文档（Docx/Wiki，含 doubao.com 托管的 /docx/、/wiki/）、
-  知识库（Wiki）、云盘（Drive，/drive/、/file/）、电子表格（Sheets，/sheets/）、多维表格（Base/Bitable/BaseApp，/base/、/app/）、
-  幻灯片（Slides，/slides/）、画板（Whiteboard）、即时通讯（IM 收发消息/群聊/聊天文件/交互卡片）、通讯录（Contact 姓名/邮箱查 open_id）、
-  日历与会议室（Calendar）、视频会议与妙记（Meeting/Minutes/VC，/minutes/）、任务（Task）、审批（Approval）、
-  邮件（Mail）、OKR、考勤（Attendance）、云端原生 Markdown、妙搭应用（Apps，/page/）、实时事件流（Event consume）、
-  认证授权（auth/config）及原生 OpenAPI 探索。遇到上述飞书业务域或 URL/token 时使用（按 URL 路径模式而非域名路由，不要回退到 WebFetch）。
-  不负责：project.feishu.cn 飞书项目工单（走 lark-proj / lark-story-closeout）、整篇本地 .md 含 mermaid 导入飞书文档（走 markdown-to-lark-doc）、
-  架构图转飞书画板原生节点（走 architecture-to-lark-whiteboard）、按人名/账号查单聊记录（走 finding-lark-chat-history）。
+  飞书/Lark 官方 lark-cli 统一入口：云文档/Wiki、云盘、Sheets、Base、Slides、画板、IM（含按人名/邮箱前缀查单聊记录）、
+  通讯录、日历、会议/妙记、任务、审批、邮件、OKR、考勤、妙搭、事件流、auth 与原生 OpenAPI。遇到这些业务域，
+  或 /docx/ /wiki/ /drive/ /file/ /sheets/ /base/ /app/ /slides/ /minutes/ /page/ 路径的 URL/token 时使用，不要回退 WebFetch。
+  Not for：飞书项目工单（lark-proj / lark-story-closeout）、整篇 .md 导入飞书（markdown-to-lark-doc）。
 metadata:
   requires:
     bins: ["lark-cli"]
@@ -25,8 +21,10 @@ metadata:
 - **`project.feishu.cn` 飞书项目（Meego）bug / story 工单读写** → [`lark-proj`](../lark-proj/SKILL.md)（底层为 `bdt lark-proj`，不使用 `lark-cli`）
 - **飞书项目需求单完成评论生成与节点流转** → [`lark-story-closeout`](../lark-story-closeout/SKILL.md)
 - **整篇本地 `.md`（含 ` ```mermaid ` 自动转画板）导入飞书云文档** → [`markdown-to-lark-doc`](../markdown-to-lark-doc/SKILL.md)
-- **把架构图画成飞书画板里的原生可编辑节点** → [`architecture-to-lark-whiteboard`](../architecture-to-lark-whiteboard/SKILL.md)
-- **按中文姓名 / 邮箱前缀 / `open_id` 查单聊（P2P）历史记录** → [`finding-lark-chat-history`](../finding-lark-chat-history/SKILL.md)
+
+本入口内置的专项流程：
+
+- **按中文姓名 / 邮箱前缀 / `open_id` / `chat_id` 查单聊（P2P）历史记录** → 先读 [references/p2p-chat-history.md](references/p2p-chat-history.md)
 
 ---
 

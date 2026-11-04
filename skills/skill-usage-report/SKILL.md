@@ -1,6 +1,7 @@
 ---
 name: skill-usage-report
-description: "月度 skill 用量观测与 nmem 月报写回：跑 transcript 统计、环比上月、抽查漏触发/误触发、按模板把结论写回 nmem。Use whenever the user asks to 跑月度 skill stats、用量月报、skill 用量观测、前门渗透率、看看 skill 触发情况、monthly skill usage report, or mentions checking how often skills or front doors actually trigger. Not for skill contract checking (verify-skills.sh), and not for battle-debug eval scoring."
+description: "月度 skill 用量观测：跑 transcript 统计、环比上月、抽查漏触发/误触发、月报写回 nmem。手动 /skill-usage-report 调用。"
+disable-model-invocation: true
 ---
 
 # Skill Usage Report: 月度用量观测与月报写回

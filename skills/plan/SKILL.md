@@ -1,7 +1,7 @@
 ---
 name: plan
-description: "Take a position before any code: a quick 2-3 sentence stance on a small well-defined change (Lightweight), or a decision-complete plan — design and tradeoffs, opening the frame (格局, recommend the right target) vs grounding an over-ambitious idea (苟, a minimal verifiable first move), value judgment (Kill/Keep/Pivot) with multi-item triage, refactor planning, plan stress-testing, deep-module and domain vocabulary, lightweight acceptance against the approved plan, persisting plans when asked (defaults to .plans/), and detached checks (交接检查) that make a persisted plan executable by a fresh session. A self-contained front door for code work; it decides and records the decision, it does not implement, debug, or review code."
-when_to_use: "出方案, 给方案, 怎么设计, 用什么方案, 怎么弄合适, 哪种方式好, 快速判断怎么改, 判断一下, 值不值得, 要不要做, 有没有必要, 看看这几个需求, 重构怎么改, 重构方案, 帮我拷问这个计划, 验收一下, 这个计划脱离 session 能否执行, 计划交接给别的会话, 给计划补充交接信息, 计划交接检查, 打开格局, 格局太小, 站高一点, 别太保守, 太飘, 太理想化, 怎么落地, 先落地, 收一收, 苟一下, plan this, how should I design, what's the best approach, quick take, refactor plan, is this worth it, grill this plan, did we build what was asked, can a fresh session execute this plan, handoff check for this plan, think bigger, make this real, what do I do first"
+description: "Take a position before code: a quick stance on a small change, or a decision-complete plan — design/tradeoffs, 格局 vs 苟, Kill/Keep/Pivot triage, refactor plan, plan stress-test, acceptance vs the approved plan, persisting to .plans/, detached handoff check. Decides; does not implement, debug, or review code."
+when_to_use: "出方案, 怎么设计, 值不值得, 重构方案, 拷问计划, 验收一下, 计划交接检查, 打开格局, 苟一下, plan this, is this worth it, grill this plan"
 dispatch_intent: "New feature design, architecture, value judgment, refactor planning, plan stress-test, acceptance against an approved plan, detached check of a persisted plan"
 allowed-tools: "Read, Grep, Glob, Bash, WebFetch, WebSearch, Edit, Write"
 ---
@@ -41,7 +41,7 @@ If requirements conflict — two contradicting sources, or two valid interpretat
 
 For asks where the problem is already defined and the only open question is "how" — a small change, a method choice, a quick take. May: give one recommended change in 2-3 sentences — what changes, where (file:line if known), and why; name the brute-force version first and default to it unless the user wants elegance; state one risk; list involved files and flag if more than 5. Must not: expand into the full Design ritual, or absorb error/bug context (that routes to `/hunt`).
 
-Upgrade to Design when 3+ genuinely different approaches with meaningful tradeoffs emerge. Boundary with `/lazy`: lazy constrains how small the implementation gets; Lightweight decides the stance on what to do.
+Upgrade to Design when 3+ genuinely different approaches with meaningful tradeoffs emerge.
 
 ### Evaluate
 
