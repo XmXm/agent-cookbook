@@ -74,7 +74,7 @@ For "can a fresh session execute this plan / 这个计划脱离 session 能否�
 ## Persist the Plan
 
 The persistence contract lives in `shared/plan-artifacts.md`: when a plan file
-earns its keep, the `.plans/<NNN>-<slug>/` layout, the roles of `task_plan.md`
+earns its keep, the `.plans/<YYYYMMDD>-<slug>/` layout, the roles of `task_plan.md`
 / `findings.md` / `research/` / `progress.md`, and the anti-bloat discipline.
 In short: persist only when the user's words call for a plan file — an explicit
 ask, a named target directory, or a stated cross-session / detached execution.

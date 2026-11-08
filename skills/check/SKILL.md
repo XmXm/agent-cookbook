@@ -92,7 +92,7 @@ Those phrases alone, without `/check`, do not open this skill.
 1. State which plan is being executed (first heading or summary line).
 2. Check for repo drift: `git status --short --branch` and skim changed files that contradict the plan. If drift makes the plan unsafe, name the conflict and stop. If `progress.md` has a phase handoff table, confirm the rows of the phases this phase depends on (per the Playbook's orchestration section, else the preceding phase) are filled before starting it; an empty row is drift — name it and stop.
 3. Work through each plan item as a to-do. Mark each complete as you go.
-4. If the plan lives in a `.plans/<NNN>-*/` directory, update `progress.md` as phases complete (if present; create it only when execution spans sessions or is long-running), per the `shared/plan-artifacts.md` contract — rolling summaries, completed phases fold into one line; fill the phase's handoff-table row when it merges (the table is exempt from folding).
+4. If the plan lives in a `.plans/*/` directory, update `progress.md` as phases complete (if present; create it only when execution spans sessions or is long-running), per the `shared/plan-artifacts.md` contract — rolling summaries, completed phases fold into one line; fill the phase's handoff-table row when it merges (the table is exempt from folding).
 5. After all items are done, run the project's verification command. If the
    project documents none, run `bash <skill-base-dir>/scripts/run-tests.sh`
    from the project root — it auto-detects the test command.

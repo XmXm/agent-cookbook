@@ -63,4 +63,4 @@ does not implement code.
 
 ## Persisting the plan
 
-Write the approved design header (Goal, Building/Not Building, Approach, Key Decisions, Premise Collapse, External Dependencies, Verification Plan, Rollback) into `task_plan.md` in the target directory (the directory the user named, or `.plans/<NNN>-<slug>/` by default — contract in `shared/plan-artifacts.md`). `plan` records the plan itself; there is no separate persistence step.
+Write the approved design header (Goal, Building/Not Building, Approach, Key Decisions, Premise Collapse, External Dependencies, Verification Plan, Rollback) into `task_plan.md` in the target directory (the directory the user named, or `.plans/<YYYYMMDD>-<slug>/` by default — contract in `shared/plan-artifacts.md`). `plan` records the plan itself; there is no separate persistence step.

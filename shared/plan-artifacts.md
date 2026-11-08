@@ -19,13 +19,14 @@ carrier for an approved decision, never the goal.
 ## Target directory
 
 Use the directory the user names. If none is given, default to
-`.plans/<NNN>-<slug>/`, where `<NNN>` is zero-padded and one greater than the
-highest existing `.plans/NNN-*` (start at `001`), and `<slug>` is a short
-kebab-case summary of the task.
+`.plans/<YYYYMMDD>-<slug>/`, where `<YYYYMMDD>` is the local creation date
+and `<slug>` is a short, specific kebab-case summary of the task. Never derive
+a sequence number from existing directories. If the path already exists, make
+the slug more specific instead of adding a numeric suffix. Older numbered
+directories (`.plans/001-*`) stay as they are; do not rename them.
 
 ```bash
-NEXT=$(ls -d .plans/[0-9]* 2>/dev/null | sed 's|.plans/||;s/-.*//' | sort -n | tail -1)
-printf ".plans/%03d-%s/\n" "$(( ${NEXT:-0} + 1 ))" "<slug>"
+printf ".plans/%s-%s/\n" "$(date +%Y%m%d)" "<slug>"
 ```
 
 ## Files and owners
@@ -43,7 +44,7 @@ printf ".plans/%03d-%s/\n" "$(( ${NEXT:-0} + 1 ))" "<slug>"
 (blank line between them):
 
 ```text
-# 045 管家 Owner 动作卡与安全交付计划
+# 管家 Owner 动作卡与安全交付计划
 
 状态：已完成并部署（集成提交 `fe8f298`，生产 HEAD 已包含）
 ```
